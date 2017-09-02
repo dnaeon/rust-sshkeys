@@ -1,0 +1,8 @@
+[package]
+name = "sshkeys"
+version = "0.1.0"
+authors = ["Marin Atanasov Nikolov <dnaeon@gmail.com>"]
+
+[dependencies]
+base64 = "0.6.0"
+byteorder = "1.1.0"
