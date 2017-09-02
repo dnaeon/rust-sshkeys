@@ -46,7 +46,6 @@ impl PublicKey {
         let mut iter = contents.split_whitespace();
 
         let kt_name = iter.next().ok_or(Error::with_kind(Kind::InvalidFormat))?;
-        let kt = KeyType::from_name(&kt_name)?;
 
         let data = iter.next().ok_or(Error::with_kind(Kind::InvalidFormat))?;
         let comment = iter.next().map(|v| String::from(v));
@@ -54,16 +53,17 @@ impl PublicKey {
         let decoded = base64::decode(&data)?;
         let mut cursor = Cursor::new(&decoded);
 
-        // Validate key format before reading rest of the data
+        // Validate key type before reading rest of the data
         let kt_from_cursor = cursor.read_string()?;
         if kt_name != kt_from_cursor {
             return Err(Error::with_kind(Kind::KeyTypeMismatch))
         }
 
-        let kind = PublicKey::from_cursor(&kt, &mut cursor)?;
+        // Construct a new `PublicKey` value and preserve the `comment` value.
+        let k = PublicKey::from_cursor(&kt_name, &mut cursor)?;
         let key = PublicKey {
-            key_type: kt,
-            kind: kind,
+            key_type: k.key_type,
+            kind: k.kind,
             comment: comment,
         };
 
@@ -76,23 +76,17 @@ impl PublicKey {
     pub fn from_bytes<T: ?Sized + AsRef<[u8]>>(data: &T) -> Result<PublicKey> {
         let mut cursor = Cursor::new(&data);
         let kt_name = cursor.read_string()?;
-        let kt = KeyType::from_name(&kt_name)?;
-        let kind = PublicKey::from_cursor(&kt, &mut cursor)?;
-        let key = PublicKey {
-            key_type: kt,
-            kind: kind,
-            comment: None,
-        };
 
-        Ok(key)
+        PublicKey::from_cursor(&kt_name, &mut cursor)
     }
 
     // This function is used for extracting a public key from an existing cursor, e.g.
     // we already have a cursor for reading an OpenSSH certificate key and
     // we want to extract the public key information from it.
-    pub(crate) fn from_cursor(kt: &KeyType, cursor: &mut Cursor) -> Result<PublicKeyKind> {
-        let name = kt.name();
-        let kind = match name {
+    pub(crate) fn from_cursor(kt_name: &str, cursor: &mut Cursor) -> Result<PublicKey> {
+        let kt = KeyType::from_name(&kt_name)?;
+
+        let kind = match kt_name {
             "ssh-rsa" |
             "ssh-rsa-cert-v01@openssh.com" => {
                 let k = RsaPublicKey {
@@ -103,11 +97,15 @@ impl PublicKey {
                 PublicKeyKind::Rsa(k)
             },
             // TODO: Implement the rest of the key kinds
-            _ => return Err(Error::with_kind(Kind::UnknownKeyType(String::from(name)))),
+            _ => return Err(Error::with_kind(Kind::UnknownKeyType(String::from(kt_name)))),
         };
 
-        // TODO: This should probably return a new `PublicKey` instead of `PublicKeyKind`
+        let key = PublicKey {
+            key_type: kt,
+            kind: kind,
+            comment: None,
+        };
 
-        Ok(kind)
+        Ok(key)
     }
 }

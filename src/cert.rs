@@ -4,7 +4,7 @@ use std::path::Path;
 use std::io::Read;
 
 use super::keytype::KeyType;
-use super::pubkey::{PublicKey, PublicKeyKind};
+use super::pubkey::PublicKey;
 use super::cursor::Cursor;
 use super::error::{Error, Kind, Result};
 
@@ -19,7 +19,7 @@ pub enum CertType {
 pub struct Certificate {
     pub key_type: KeyType,
     pub nonce: Vec<u8>,
-    pub key: PublicKeyKind,
+    pub key: PublicKey,
     pub serial: u64,
     pub cert_type: CertType,
     pub key_id: String,
@@ -67,7 +67,7 @@ impl Certificate {
         }
 
         let nonce = cursor.read_bytes()?;
-        let key = PublicKey::from_cursor(&kt, &mut cursor)?;
+        let key = PublicKey::from_cursor(&kt_name, &mut cursor)?;
         let serial = cursor.read_u64()?;
 
         let cert_type = match cursor.read_u32()? {
