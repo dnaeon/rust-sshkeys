@@ -2,7 +2,7 @@ use std::io::Read;
 use std::fs::File;
 use std::path::Path;
 
-use super::keytype::KeyType;
+use super::keytype::{KeyType, KeyTypeKind};
 use super::cursor::Cursor;
 use super::error::{Error, Kind, Result};
 
@@ -86,9 +86,9 @@ impl PublicKey {
     pub(crate) fn from_cursor(kt_name: &str, cursor: &mut Cursor) -> Result<PublicKey> {
         let kt = KeyType::from_name(&kt_name)?;
 
-        let kind = match kt_name {
-            "ssh-rsa" |
-            "ssh-rsa-cert-v01@openssh.com" => {
+        let kind = match kt.kind {
+            KeyTypeKind::KeyRsa |
+            KeyTypeKind::KeyRsaCert => {
                 let k = RsaPublicKey {
                     e: cursor.read_mpint()?,
                     n: cursor.read_mpint()?,
@@ -97,7 +97,7 @@ impl PublicKey {
                 PublicKeyKind::Rsa(k)
             },
             // TODO: Implement the rest of the key kinds
-            _ => return Err(Error::with_kind(Kind::UnknownKeyType(String::from(kt_name)))),
+            _ => unimplemented!(),
         };
 
         let key = PublicKey {

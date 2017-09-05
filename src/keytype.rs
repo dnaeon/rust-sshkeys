@@ -13,10 +13,10 @@ pub enum KeyTypeKind {
 
 // The `KeyType` represents the type of an OpenSSH key.
 pub struct KeyType {
-    name: &'static str,
-    short_name: &'static str,
-    is_cert: bool,
-    kind: KeyTypeKind,
+    pub name: &'static str,
+    pub short_name: &'static str,
+    pub is_cert: bool,
+    pub kind: KeyTypeKind,
 }
 
 impl KeyType {
@@ -125,17 +125,5 @@ impl KeyType {
         };
 
         Ok(kt)
-    }
-
-    pub fn name(&self) -> &str{
-        self.name
-    }
-
-    pub fn short_name(&self) -> &str {
-        self.short_name
-    }
-
-    pub fn is_cert(&self) -> bool {
-        self.is_cert
     }
 }

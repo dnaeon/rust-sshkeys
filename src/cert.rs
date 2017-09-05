@@ -51,7 +51,7 @@ impl Certificate {
         let kt_name = iter.next().ok_or(Error::with_kind(Kind::InvalidFormat))?;
         let kt = KeyType::from_name(&kt_name)?;
 
-        if !kt.is_cert() {
+        if !kt.is_cert {
             return Err(Error::with_kind(Kind::NotCertificate));
         }
 
