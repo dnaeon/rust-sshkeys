@@ -12,4 +12,4 @@ pub use self::cert::{CertType, Certificate};
 pub use self::cursor::Cursor;
 pub use self::error::{Error, Kind, Result};
 pub use self::pubkey::{PublicKey, PublicKeyKind, RsaPublicKey};
-pub use self::keytype::KeyType;
+pub use self::keytype::{KeyType, KeyTypeKind};
