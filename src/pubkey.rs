@@ -108,4 +108,14 @@ impl PublicKey {
 
         Ok(key)
     }
+
+    // Returns the number of bits of the public key
+    pub fn bits(&self) -> usize {
+        match self.kind {
+            // For RSA public key the size of the key is the number of bits of the modulus
+            PublicKeyKind::Rsa(ref k) => {
+                k.n.len() * 8
+            }
+        }
+    }
 }
