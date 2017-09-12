@@ -24,6 +24,7 @@ pub struct RsaPublicKey {
 }
 
 // Represents a public key in OpenSSH format
+#[derive(Debug)]
 pub struct PublicKey {
     pub key_type: KeyType,
     pub kind: PublicKeyKind,
@@ -48,10 +49,10 @@ impl PublicKey {
         let mut iter = contents.split_whitespace();
 
         let kt_name = iter.next().ok_or(Error::with_kind(Kind::InvalidFormat))?;
-
         let data = iter.next().ok_or(Error::with_kind(Kind::InvalidFormat))?;
         let comment = iter.next().map(|v| String::from(v));
 
+        let kt = KeyType::from_name(&kt_name)?;
         let decoded = base64::decode(&data)?;
         let mut cursor = Cursor::new(&decoded);
 
@@ -64,7 +65,7 @@ impl PublicKey {
         // Construct a new `PublicKey` value and preserve the `comment` value.
         let k = PublicKey::from_cursor(&kt_name, &mut cursor)?;
         let key = PublicKey {
-            key_type: k.key_type,
+            key_type: kt,
             kind: k.kind,
             comment: comment,
         };
