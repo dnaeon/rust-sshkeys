@@ -13,6 +13,7 @@ pub enum KeyTypeKind {
 }
 
 // The `KeyType` represents the type of an OpenSSH key.
+#[derive(Debug)]
 pub struct KeyType {
     pub name: &'static str,
     pub short_name: &'static str,
