@@ -1,3 +1,5 @@
+use std::error::Error;
+
 extern crate sshkeys;
 
 #[test]
@@ -38,4 +40,22 @@ fn test_rsa_pubkey_2048() {
     };
 
     // TODO: Test the fingerprint
+}
+
+#[test]
+#[should_panic(expected = "Invalid format")]
+fn test_rsa_pubkey_2048_invalid_format() {
+    match sshkeys::PublicKey::from_path("tests/test-keys/id_rsa_2048_invalid_format.pub") {
+        Ok(v)  => panic!("Expected invalid format, got {:?}", v),
+        Err(e) => panic!("{}", e.description()),
+    }
+}
+
+#[test]
+#[should_panic(expected = "Unknown key type")]
+fn test_rsa_pubkey_2048_unknown_keytype() {
+    match sshkeys::PublicKey::from_path("tests/test-keys/id_rsa_2048_unknown_keytype.pub") {
+        Ok(v)  => panic!("Expected unknown key type, got {:?}", v),
+        Err(e) => panic!("{}", e.description()),
+    }
 }
