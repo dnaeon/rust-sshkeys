@@ -1,5 +1,6 @@
 use super::error::{Kind, Result, Error};
 
+#[derive(Debug, PartialEq)]
 pub enum KeyTypeKind {
     KeyRsa,
     KeyDsa,

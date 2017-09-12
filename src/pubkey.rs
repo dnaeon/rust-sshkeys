@@ -9,6 +9,7 @@ use super::error::{Error, Kind, Result};
 use base64;
 
 // The different kinds of public keys.
+#[derive(Debug, PartialEq)]
 pub enum PublicKeyKind {
     Rsa(RsaPublicKey),
 }
@@ -16,6 +17,7 @@ pub enum PublicKeyKind {
 // TODO: Implement methods on `PublicKeyKind` for displaying key fingerprint
 
 // RSA public key format is described in RFC 4253, section 6.6
+#[derive(Debug, PartialEq)]
 pub struct RsaPublicKey {
     pub e: Vec<u8>,
     pub n: Vec<u8>,
