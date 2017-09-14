@@ -17,6 +17,8 @@ pub enum CertType {
     Host
 }
 
+// A type which represents an OpenSSH Certificate key.
+// https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.certkeys
 #[derive(Debug)]
 pub struct Certificate {
     pub key_type: KeyType,
@@ -31,8 +33,8 @@ pub struct Certificate {
     pub critical_options: HashMap<String, String>,
     pub extensions: HashMap<String, String>,
     pub reserved: Vec<u8>,
-    pub signature_key: Vec<u8>,
-    pub signature: PublicKey,
+    pub signature_key: PublicKey,
+    pub signature: Vec<u8>,
 }
 
 impl Certificate {
@@ -86,18 +88,17 @@ impl Certificate {
         let valid_after = cursor.read_u64()?;
         let valid_before = cursor.read_u64()?;
 
-        // Critical options
         let buf = cursor.read_bytes()?;
         let critical_options = read_options(&buf)?;
 
-        // Extensions
         let buf = cursor.read_bytes()?;
         let extensions = read_options(&buf)?;
-
-        let signature_key = cursor.read_bytes()?;
+        let reserved = cursor.read_bytes()?;
 
         let buf = cursor.read_bytes()?;
-        let signature = PublicKey::from_bytes(&buf)?;
+
+        let signature_key = PublicKey::from_bytes(&buf)?;
+        let signature = cursor.read_bytes()?;
 
         let cert = Certificate {
             key_type: kt,
@@ -111,7 +112,7 @@ impl Certificate {
             valid_before: valid_before,
             critical_options: critical_options,
             extensions: extensions,
-            reserved: Vec::new(),
+            reserved: reserved,
             signature_key: signature_key,
             signature: signature,
         };
