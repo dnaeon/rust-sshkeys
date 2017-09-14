@@ -107,3 +107,12 @@ fn test_rsa_cert() {
     // TODO: Validate CA Public key fingerprint
     // TODO: Validate the `signature` field
 }
+
+#[test]
+#[should_panic(expected = "Not a certificate")]
+fn test_rsa_not_cert() {
+    match sshkeys::Certificate::from_path("tests/test-keys/id_rsa_2048.pub") {
+        Ok(v)  => panic!("Expected not a certificate error, got {:?}", v),
+        Err(e) => panic!("{}", e.description()),
+    }
+}
