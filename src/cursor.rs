@@ -77,16 +77,6 @@ impl<'a> Cursor<'a> {
         Ok(result)
     }
 
-    // Reads a `string` value from the wrapped byte sequence and
-    // returns it as a `String`. The value that we read
-    // is not checked whether it is a valid UTF-8.
-    pub fn read_string_unchecked(&mut self) -> Result<String> {
-        let bytes = self.read_bytes()?;
-        let result = unsafe { String::from_utf8_unchecked(bytes) };
-
-        Ok(result)
-    }
-
     // Reads an `u64` value from the wrapped byte sequence and returns it.
     pub fn read_u64(&mut self) -> Result<u64> {
         if self.offset >= self.inner.len() {
