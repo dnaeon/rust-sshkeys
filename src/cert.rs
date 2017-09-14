@@ -11,11 +11,13 @@ use super::error::{Error, Kind, Result};
 use base64;
 
 // `CertType` represents the valid types a certificate can be.
+#[derive(Debug, PartialEq)]
 pub enum CertType {
     User,
     Host
 }
 
+#[derive(Debug)]
 pub struct Certificate {
     pub key_type: KeyType,
     pub nonce: Vec<u8>,
@@ -81,24 +83,20 @@ impl Certificate {
         // Valid principals is a list of strings, so we must use a new
         // cursor and read all strings from it.
         let valid_principals = match cursor.read_bytes() {
-            Ok(buf) => Cursor::new(&buf).read_strings_until_eof()?,
+            Ok(buf) => Cursor::new(&buf).read_strings()?,
             Err(e)  => return Err(e),
         };
 
         let valid_after = cursor.read_u64()?;
         let valid_before = cursor.read_u64()?;
 
-        // Critical options is a HashMap
-        let critical_options = match cursor.read_bytes() {
-            Ok(buf) => Cursor::new(&buf).read_strings_to_map()?,
-            Err(e)  => return Err(e),
-        };
+        // Critical options
+        let co_buf = cursor.read_bytes()?;
+        let critical_options = read_options(&co_buf)?;
 
-        // Extensions is a HashMap, where each key value is the empty string.
-        let extensions = match cursor.read_bytes() {
-            Ok(buf) => Cursor::new(&buf).read_strings_to_map()?,
-            Err(e)  => return Err(e),
-        };
+        // Extensions
+        let extensions_buf = cursor.read_bytes()?;
+        let extensions = read_options(&extensions_buf)?;
 
         let signature_key = cursor.read_bytes()?;
         let signature_buf = cursor.read_bytes()?;
@@ -125,4 +123,49 @@ impl Certificate {
     }
 
     // TODO: Add method for validating a certificate, e.g. whether or not it has already expired
+}
+
+// Reads `option` values from a byte sequence.
+// The `option` values are used to represent the `critical options` and
+// `extensions` in an OpenSSH certificate key, which are represented as tuples
+// containing the `name` and `data` values of type `string`.
+// Some `options` are `flags` only (e.g. the certificate extensions) and the
+// associated value with them is the empty string (""), while others are `string`
+// options and have an associated value, which is a `string`.
+// The `critical options` of a certificate are always `string` options, since they
+// have an associated `string` value, which is embedded in a separate buffer, so
+// in order to extract the associated value we need to read the buffer first and then
+// read the `string` value itself.
+fn read_options(buf: &[u8]) -> Result<HashMap<String, String>> {
+    let mut reader = Cursor::new(&buf);
+    let mut options = HashMap::new();
+
+    // Use a `Reader` and loop until EOF is reached, so that we can
+    // read all options from the provided byte slice.
+    loop {
+        let name = match reader.read_string() {
+            Ok(v)  => v,
+            Err(e) => {
+                match e.kind {
+                    Kind::UnexpectedEof => break,
+                    _ => return Err(e),
+                }
+            },
+        };
+
+        // If we have a `string` option extract the value from the buffer,
+        // otherwise we have a `flag` option which is the `empty` string.
+        let value_buf = reader.read_bytes()?;
+        let value = if value_buf.len() > 0 {
+            Cursor::new(&value_buf).read_string()?
+        } else {
+            "".to_string()
+        };
+
+        // TODO: Check if the options are in lexical order
+        // TODO: Check if options are specified only once
+        options.insert(name, value);
+    }
+
+    Ok(options)
 }
