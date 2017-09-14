@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-use std::iter::FromIterator;
-
 use super::error::{Error, Kind, Result};
 
 use byteorder::{BigEndian, ByteOrder};
@@ -77,23 +74,6 @@ impl<'a> Cursor<'a> {
         Ok(result)
     }
 
-    // Reads an `u64` value from the wrapped byte sequence and returns it.
-    pub fn read_u64(&mut self) -> Result<u64> {
-        if self.offset >= self.inner.len() {
-            return Err(Error { kind: Kind::UnexpectedEof });
-        }
-
-        let slice = &self.inner[self.offset..];
-        if slice.len() < 8 {
-            return Err(Error { kind: Kind::InvalidFormat });
-        }
-
-        self.offset += 8;
-        let value = BigEndian::read_u64(&slice[..8]);
-
-        Ok(value)
-    }
-
     // Reads an `u32` value from the wrapped byte sequence and returns it.
     pub fn read_u32(&mut self) -> Result<u32> {
         if self.offset >= self.inner.len() {
@@ -111,61 +91,20 @@ impl<'a> Cursor<'a> {
         Ok(value)
     }
 
-    // Reads a sequence of `string` values until `Error::UnexpectedEof` is returned.
-    // Some data fields from a certificate key, such as `valid principals` are represented as a
-    // sequence of `string` values, so this function reads them all until EOF is reached.
-    //
-    // TODO: This should probably be public only within the crate itself
-    pub fn read_strings_until_eof(&mut self) -> Result<Vec<String>> {
-        let mut result = Vec::new();
-
-        loop {
-            let s = match self.read_string() {
-                Ok(v) => v,
-                Err(e) => {
-                    match e.kind {
-                        Kind::UnexpectedEof => break,
-                        _ => return Err(e),
-                    }
-                },
-            };
-            result.push(s);
+    // Reads an `u64` value from the wrapped byte sequence and returns it.
+    pub fn read_u64(&mut self) -> Result<u64> {
+        if self.offset >= self.inner.len() {
+            return Err(Error { kind: Kind::UnexpectedEof });
         }
 
-        Ok(result)
-    }
-
-    // Some certificate fields such as the `critical options` one is a hash,
-    // which is represented as a sequence of `string` values, where `even` indices
-    // represent the hash keys and `odd` ones their associated values.
-    // This method converts a byte sequence to a `HashMap<String, String>`.
-    // Another certificate field `extensions` has a similar format, except that the values
-    // are the empty ("") string.
-    //
-    // TODO: This should probably be public only within the crate itself
-    pub fn read_strings_to_map(&mut self) -> Result<HashMap<String, String>> {
-        let items = self.read_strings_until_eof()?;
-
-        if items.len() % 2 != 0 {
+        let slice = &self.inner[self.offset..];
+        if slice.len() < 8 {
             return Err(Error { kind: Kind::InvalidFormat });
         }
 
-        // Even indexes are the hash keys
-        let keys: Vec<String> = items.iter()
-            .enumerate()
-            .filter(|&(i, _)| i % 2 == 0)
-            .map(|(_, v)| v.to_string())
-            .collect();
+        self.offset += 8;
+        let value = BigEndian::read_u64(&slice[..8]);
 
-        // Odd indexes are the hash values
-        let values: Vec<String> = items.iter()
-            .enumerate()
-            .filter(|&(i, _)| i % 2 != 0)
-            .map(|(_, v)| v.to_string())
-            .collect();
-
-        let map: HashMap<String, String> = HashMap::from_iter(keys.into_iter().zip(values.into_iter()));
-
-        Ok(map)
+        Ok(value)
     }
 }
