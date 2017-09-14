@@ -80,27 +80,24 @@ impl Certificate {
 
         let key_id = cursor.read_string()?;
 
-        // Valid principals is a list of strings, so we must use a new
-        // cursor and read all strings from it.
-        let valid_principals = match cursor.read_bytes() {
-            Ok(buf) => Cursor::new(&buf).read_strings()?,
-            Err(e)  => return Err(e),
-        };
+        let buf = cursor.read_bytes()?;
+        let principals = read_principals(&buf)?;
 
         let valid_after = cursor.read_u64()?;
         let valid_before = cursor.read_u64()?;
 
         // Critical options
-        let co_buf = cursor.read_bytes()?;
-        let critical_options = read_options(&co_buf)?;
+        let buf = cursor.read_bytes()?;
+        let critical_options = read_options(&buf)?;
 
         // Extensions
-        let extensions_buf = cursor.read_bytes()?;
-        let extensions = read_options(&extensions_buf)?;
+        let buf = cursor.read_bytes()?;
+        let extensions = read_options(&buf)?;
 
         let signature_key = cursor.read_bytes()?;
-        let signature_buf = cursor.read_bytes()?;
-        let signature = PublicKey::from_bytes(&signature_buf)?;
+
+        let buf = cursor.read_bytes()?;
+        let signature = PublicKey::from_bytes(&buf)?;
 
         let cert = Certificate {
             key_type: kt,
@@ -109,7 +106,7 @@ impl Certificate {
             serial: serial,
             cert_type: cert_type,
             key_id: key_id,
-            valid_principals: valid_principals,
+            valid_principals: principals,
             valid_after: valid_after,
             valid_before: valid_before,
             critical_options: critical_options,
@@ -148,7 +145,7 @@ fn read_options(buf: &[u8]) -> Result<HashMap<String, String>> {
             Err(e) => {
                 match e.kind {
                     Kind::UnexpectedEof => break,
-                    _ => return Err(e),
+                    _                   => return Err(e),
                 }
             },
         };
@@ -168,4 +165,30 @@ fn read_options(buf: &[u8]) -> Result<HashMap<String, String>> {
     }
 
     Ok(options)
+}
+
+// Reads the `valid principals` field of a certificate key.
+// The `valid principals` are represented as a sequence of `string` values
+// embedded in a buffer.
+// This function reads the whole byte slice until EOF is reached in order to
+// ensure all principals are read from the byte slice.
+fn read_principals(buf: &[u8]) -> Result<Vec<String>> {
+    let mut reader = Cursor::new(&buf);
+    let mut items = Vec::new();
+
+    loop {
+        let principal = match reader.read_string() {
+            Ok(v)  => v,
+            Err(e) => {
+                match e.kind {
+                    Kind::UnexpectedEof => break,
+                    _                   => return Err(e),
+                }
+            },
+        };
+
+        items.push(principal);
+    }
+
+    Ok(items)
 }
