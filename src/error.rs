@@ -61,7 +61,7 @@ impl StdError for Error {
             Kind::InvalidFormat      => "Invalid format",
             Kind::UnexpectedEof      => "Unexpected EOF reached while reading data",
             Kind::UnknownKeyType(_)  => "Unknown key type",
-            Kind::NotCertificate     => "Is not a certificate",
+            Kind::NotCertificate     => "Not a certificate",
             Kind::KeyTypeMismatch    => "Key type mismatch",
         }
     }
@@ -91,7 +91,7 @@ impl fmt::Display for Error {
             Kind::InvalidCertType(v)    => write!(f, "Invalid certificate type with value {}", v),
             Kind::UnexpectedEof         => write!(f, "Unexpected EOF reached while reading data"),
             Kind::UnknownKeyType(ref v) => write!(f, "Unknown key type {}", v),
-            Kind::NotCertificate        => write!(f, "Is not a certificate"),
+            Kind::NotCertificate        => write!(f, "Not a certificate"),
             Kind::KeyTypeMismatch       => write!(f, "Key type mismatch"),
         }
     }
