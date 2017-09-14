@@ -59,3 +59,50 @@ fn test_rsa_pubkey_2048_unknown_keytype() {
         Err(e) => panic!("{}", e.description()),
     }
 }
+
+#[test]
+fn test_rsa_cert() {
+    let cert = sshkeys::Certificate::from_path("tests/test-keys/id_rsa_2048-cert.pub").unwrap();
+
+    assert_eq!(cert.key_type.name, "ssh-rsa-cert-v01@openssh.com");
+    assert_eq!(cert.key_type.short_name, "RSA-CERT");
+    assert_eq!(cert.key_type.is_cert, true);
+    assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::KeyRsaCert);
+
+    assert_eq!(cert.key.key_type.name, "ssh-rsa-cert-v01@openssh.com");
+    assert_eq!(cert.key.key_type.short_name, "RSA-CERT");
+    assert_eq!(cert.key.key_type.is_cert, true);
+    assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::KeyRsaCert);
+
+    assert_eq!(cert.serial, 0);
+    assert_eq!(cert.cert_type, sshkeys::CertType::User);
+    assert_eq!(cert.key_id, "john.doe".to_string());
+    assert_eq!(cert.valid_principals, vec!("root".to_string()));
+    assert_eq!(cert.valid_after, 1505374860);
+    assert_eq!(cert.valid_before, 1536824561);
+
+    let mut co = HashMap::new();
+    co.insert("force-command".to_string(), "/usr/bin/true".to_string());
+    co.insert("source-address".to_string(), "127.0.0.1".to_string());
+    assert_eq!(cert.critical_options, co);
+
+    let mut extensions = HashMap::new();
+    extensions.insert("permit-X11-forwarding".to_string(), "".to_string());
+    extensions.insert("permit-agent-forwarding".to_string(), "".to_string());
+    extensions.insert("permit-port-forwarding".to_string(), "".to_string());
+    extensions.insert("permit-pty".to_string(), "".to_string());
+    extensions.insert("permit-user-rc".to_string(), "".to_string());
+    assert_eq!(cert.extensions, extensions);
+
+    // The `reserved` field is empty in the current implementation of OpenSSH certificates
+    assert_eq!(cert.reserved, Vec::new());
+
+    assert_eq!(cert.signature_key.key_type.name, "ssh-rsa");
+    assert_eq!(cert.signature_key.key_type.short_name, "RSA");
+    assert_eq!(cert.signature_key.key_type.is_cert, false);
+    assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::KeyRsa);
+    assert_eq!(cert.signature_key.bits(), 2048);
+    assert_eq!(cert.signature_key.comment, None);
+    // TODO: Validate CA Public key fingerprint
+    // TODO: Validate the `signature` field
+}
