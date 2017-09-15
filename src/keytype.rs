@@ -1,4 +1,4 @@
-use super::error::{Kind, Result, Error};
+use super::error::{Error, ErrorKind, Result};
 
 #[derive(Debug, PartialEq)]
 pub enum KeyTypeKind {
@@ -123,7 +123,7 @@ impl KeyType {
                     is_cert: true,
                     kind: KeyTypeKind::KeyEcdsaCert,
                 },
-            _ => return Err(Error::with_kind(Kind::UnknownKeyType(String::from(name)))),
+            _ => return Err(Error::with_kind(ErrorKind::UnknownKeyType(name.to_string()))),
         };
 
         Ok(kt)

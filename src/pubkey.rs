@@ -4,7 +4,7 @@ use std::path::Path;
 
 use super::keytype::{KeyType, KeyTypeKind};
 use super::cursor::Cursor;
-use super::error::{Error, Kind, Result};
+use super::error::{Error, ErrorKind, Result};
 
 use base64;
 
@@ -48,8 +48,8 @@ impl PublicKey {
     pub fn from_string(contents: &str) -> Result<PublicKey> {
         let mut iter = contents.split_whitespace();
 
-        let kt_name = iter.next().ok_or(Error::with_kind(Kind::InvalidFormat))?;
-        let data = iter.next().ok_or(Error::with_kind(Kind::InvalidFormat))?;
+        let kt_name = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
+        let data = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
         let comment = iter.next().map(|v| String::from(v));
 
         let kt = KeyType::from_name(&kt_name)?;
@@ -59,7 +59,7 @@ impl PublicKey {
         // Validate key type before reading rest of the data
         let kt_from_cursor = cursor.read_string()?;
         if kt_name != kt_from_cursor {
-            return Err(Error::with_kind(Kind::KeyTypeMismatch))
+            return Err(Error::with_kind(ErrorKind::KeyTypeMismatch))
         }
 
         // Construct a new `PublicKey` value and preserve the `comment` value.

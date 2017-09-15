@@ -1,4 +1,4 @@
-use super::error::{Error, Kind, Result};
+use super::error::{Error, ErrorKind, Result};
 
 use byteorder::{BigEndian, ByteOrder};
 
@@ -30,19 +30,19 @@ impl<'a> Cursor<'a> {
     // followed by the bytes to read.
     pub fn read_bytes(&mut self) -> Result<Vec<u8>> {
         if self.offset >= self.inner.len() {
-            return Err(Error { kind: Kind::UnexpectedEof });
+            return Err(Error::with_kind(ErrorKind::UnexpectedEof));
         }
 
         let slice = &self.inner[self.offset..];
 
         if slice.len() < 4 {
-            return Err(Error { kind: Kind::InvalidFormat });
+            return Err(Error::with_kind(ErrorKind::InvalidFormat));
         }
 
         let size = BigEndian::read_u32(&slice[..4]) as usize;
 
         if slice.len() < size + 4 {
-            return Err(Error { kind: Kind::InvalidFormat });
+            return Err(Error::with_kind(ErrorKind::InvalidFormat));
         }
 
         self.offset += size + 4;
@@ -77,12 +77,12 @@ impl<'a> Cursor<'a> {
     // Reads an `u32` value from the wrapped byte sequence and returns it.
     pub fn read_u32(&mut self) -> Result<u32> {
         if self.offset >= self.inner.len() {
-            return Err(Error { kind: Kind::UnexpectedEof });
+            return Err(Error::with_kind(ErrorKind::UnexpectedEof));
         }
 
         let slice = &self.inner[self.offset..];
         if slice.len() < 4 {
-            return Err(Error { kind: Kind::InvalidFormat });
+            return Err(Error::with_kind(ErrorKind::InvalidFormat));
         }
 
         self.offset += 4;
@@ -94,12 +94,12 @@ impl<'a> Cursor<'a> {
     // Reads an `u64` value from the wrapped byte sequence and returns it.
     pub fn read_u64(&mut self) -> Result<u64> {
         if self.offset >= self.inner.len() {
-            return Err(Error { kind: Kind::UnexpectedEof });
+            return Err(Error::with_kind(ErrorKind::UnexpectedEof));
         }
 
         let slice = &self.inner[self.offset..];
         if slice.len() < 8 {
-            return Err(Error { kind: Kind::InvalidFormat });
+            return Err(Error::with_kind(ErrorKind::InvalidFormat));
         }
 
         self.offset += 8;

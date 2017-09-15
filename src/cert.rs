@@ -6,7 +6,7 @@ use std::io::Read;
 use super::keytype::KeyType;
 use super::pubkey::PublicKey;
 use super::cursor::Cursor;
-use super::error::{Error, Kind, Result};
+use super::error::{Error, ErrorKind, Result};
 
 use base64;
 
@@ -52,14 +52,14 @@ impl Certificate {
     pub fn from_string(s: &str) -> Result<Certificate> {
         let mut iter = s.split_whitespace();
 
-        let kt_name = iter.next().ok_or(Error::with_kind(Kind::InvalidFormat))?;
+        let kt_name = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
         let kt = KeyType::from_name(&kt_name)?;
 
         if !kt.is_cert {
-            return Err(Error::with_kind(Kind::NotCertificate));
+            return Err(Error::with_kind(ErrorKind::NotCertificate));
         }
 
-        let data = iter.next().ok_or(Error::with_kind(Kind::InvalidFormat))?;
+        let data = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
         let decoded = base64::decode(&data)?;
         let mut cursor = Cursor::new(&decoded);
@@ -67,7 +67,7 @@ impl Certificate {
         // Validate key types before reading the rest of the data
         let kt_from_cursor = cursor.read_string()?;
         if kt_name != kt_from_cursor {
-            return Err(Error::with_kind(Kind::KeyTypeMismatch));
+            return Err(Error::with_kind(ErrorKind::KeyTypeMismatch));
         }
 
         let nonce = cursor.read_bytes()?;
@@ -77,7 +77,7 @@ impl Certificate {
         let cert_type = match cursor.read_u32()? {
             1 => CertType::User,
             2 => CertType::Host,
-            n => return Err(Error::with_kind(Kind::InvalidCertType(n))),
+            n => return Err(Error::with_kind(ErrorKind::InvalidCertType(n))),
         };
 
         let key_id = cursor.read_string()?;
@@ -145,7 +145,7 @@ fn read_options(buf: &[u8]) -> Result<HashMap<String, String>> {
             Ok(v)  => v,
             Err(e) => {
                 match e.kind {
-                    Kind::UnexpectedEof => break,
+                    ErrorKind::UnexpectedEof => break,
                     _                   => return Err(e),
                 }
             },
@@ -182,7 +182,7 @@ fn read_principals(buf: &[u8]) -> Result<Vec<String>> {
             Ok(v)  => v,
             Err(e) => {
                 match e.kind {
-                    Kind::UnexpectedEof => break,
+                    ErrorKind::UnexpectedEof => break,
                     _                   => return Err(e),
                 }
             },
