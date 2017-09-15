@@ -12,6 +12,7 @@ use base64;
 #[derive(Debug, PartialEq)]
 pub enum PublicKeyKind {
     Rsa(RsaPublicKey),
+    Dsa(DsaPublicKey),
 }
 
 // TODO: Implement methods on `PublicKeyKind` for displaying key fingerprint
@@ -21,6 +22,15 @@ pub enum PublicKeyKind {
 pub struct RsaPublicKey {
     pub e: Vec<u8>,
     pub n: Vec<u8>,
+}
+
+// DSA public key format is described in RFC 4253, section 6.6
+#[derive(Debug, PartialEq)]
+pub struct DsaPublicKey {
+    pub p: Vec<u8>,
+    pub q: Vec<u8>,
+    pub g: Vec<u8>,
+    pub y: Vec<u8>,
 }
 
 // Represents a public key in OpenSSH format
@@ -90,7 +100,7 @@ impl PublicKey {
         let kt = KeyType::from_name(&kt_name)?;
 
         let kind = match kt.kind {
-            KeyTypeKind::KeyRsa |
+            KeyTypeKind::KeyRsa     |
             KeyTypeKind::KeyRsaCert => {
                 let k = RsaPublicKey {
                     e: cursor.read_mpint()?,
@@ -98,6 +108,17 @@ impl PublicKey {
                 };
 
                 PublicKeyKind::Rsa(k)
+            },
+            KeyTypeKind::KeyDsa     |
+            KeyTypeKind::KeyDsaCert => {
+                let k = DsaPublicKey {
+                    p: cursor.read_mpint()?,
+                    q: cursor.read_mpint()?,
+                    g: cursor.read_mpint()?,
+                    y: cursor.read_mpint()?,
+                };
+
+                PublicKeyKind::Dsa(k)
             },
             // TODO: Implement the rest of the key kinds
             _ => unimplemented!(),
@@ -118,6 +139,10 @@ impl PublicKey {
             // For RSA public key the size of the key is the number of bits of the modulus
             PublicKeyKind::Rsa(ref k) => {
                 k.n.len() * 8
+            },
+            // For DSA public keys the size of the key is the number of bits of the `p` parameter
+            PublicKeyKind::Dsa(ref k) => {
+                k.p.len() * 8
             }
         }
     }
