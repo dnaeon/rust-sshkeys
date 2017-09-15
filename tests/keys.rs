@@ -112,7 +112,7 @@ fn test_rsa_cert() {
 #[should_panic(expected = "Not a certificate")]
 fn test_rsa_not_cert() {
     match sshkeys::Certificate::from_path("tests/test-keys/id_rsa_2048.pub") {
-        Ok(v)  => panic!("Expected not a certificate error, got {:?}", v),
+        Ok(v)  => panic!("Expected public key, got certificate {:?}", v),
         Err(e) => panic!("{}", e.description()),
     }
 }
