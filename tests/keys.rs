@@ -15,9 +15,9 @@ fn test_rsa_pubkey_1024() {
     assert_eq!(key.bits(), 1024);
     assert_eq!(key.comment, None);
 
-    let rsa = match key.kind {
+    let kind = match key.kind {
         sshkeys::PublicKeyKind::Rsa(k) => k,
-        _ => panic!("Expected an RSA public key"),
+        _ => panic!("Expected RSA public key"),
     };
 
     // TODO: Test the fingerprint
@@ -33,11 +33,11 @@ fn test_rsa_pubkey_2048() {
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::KeyRsa);
 
     assert_eq!(key.bits(), 2048);
-    assert_eq!(key.comment, Some(String::from("me@home")));
+    assert_eq!(key.comment, Some("me@home".to_string()));
 
-    let rsa = match key.kind {
+    let kind = match key.kind {
         sshkeys::PublicKeyKind::Rsa(k) => k,
-        _ => panic!("Expected an RSA public key"),
+        _ => panic!("Expected RSA public key"),
     };
 
     // TODO: Test the fingerprint
@@ -115,4 +115,72 @@ fn test_rsa_not_cert() {
         Ok(v)  => panic!("Expected public key, got certificate {:?}", v),
         Err(e) => panic!("{}", e.description()),
     }
+}
+
+#[test]
+fn test_dsa_pubkey_1024() {
+    let key = sshkeys::PublicKey::from_path("tests/test-keys/id_dsa_1024.pub").unwrap();
+
+    assert_eq!(key.key_type.name, "ssh-dss");
+    assert_eq!(key.key_type.short_name, "DSA");
+    assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::KeyDsa);
+
+    assert_eq!(key.bits(), 1024);
+    assert_eq!(key.comment, Some("me@home".to_string()));
+
+    let kind = match key.kind {
+        sshkeys::PublicKeyKind::Dsa(ref k) => k,
+        _ => panic!("Expected DSA public key"),
+    };
+
+    // TODO: Verify fingerprint of key
+}
+
+#[test]
+fn test_dsa_cert() {
+    let cert = sshkeys::Certificate::from_path("tests/test-keys/id_dsa_1024-cert.pub").unwrap();
+
+    assert_eq!(cert.key_type.name, "ssh-dss-cert-v01@openssh.com");
+    assert_eq!(cert.key_type.short_name, "DSA-CERT");
+    assert_eq!(cert.key_type.is_cert, true);
+    assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::KeyDsaCert);
+
+    assert_eq!(cert.key.key_type.name, "ssh-dss-cert-v01@openssh.com");
+    assert_eq!(cert.key.key_type.short_name, "DSA-CERT");
+    assert_eq!(cert.key.key_type.is_cert, true);
+    assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::KeyDsaCert);
+
+    assert_eq!(cert.serial, 0);
+    assert_eq!(cert.cert_type, sshkeys::CertType::User);
+    assert_eq!(cert.key_id, "john.doe".to_string());
+    assert_eq!(cert.valid_principals, vec!("root".to_string()));
+
+    assert_eq!(cert.valid_after, 1505475180);
+    assert_eq!(cert.valid_before, 1536924895);
+
+    let mut co = HashMap::new();
+    co.insert("force-command".to_string(), "/usr/bin/true".to_string());
+    co.insert("source-address".to_string(), "127.0.0.1".to_string());
+    assert_eq!(cert.critical_options, co);
+
+    let mut extensions = HashMap::new();
+    extensions.insert("permit-X11-forwarding".to_string(), "".to_string());
+    extensions.insert("permit-agent-forwarding".to_string(), "".to_string());
+    extensions.insert("permit-port-forwarding".to_string(), "".to_string());
+    extensions.insert("permit-pty".to_string(), "".to_string());
+    extensions.insert("permit-user-rc".to_string(), "".to_string());
+    assert_eq!(cert.extensions, extensions);
+
+    // The `reserved` field is empty in the current implementation of OpenSSH certificates
+    assert_eq!(cert.reserved, Vec::new());
+
+    assert_eq!(cert.signature_key.key_type.name, "ssh-rsa");
+    assert_eq!(cert.signature_key.key_type.short_name, "RSA");
+    assert_eq!(cert.signature_key.key_type.is_cert, false);
+    assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::KeyRsa);
+    assert_eq!(cert.signature_key.bits(), 2048);
+    assert_eq!(cert.signature_key.comment, None);
+    // TODO: Validate CA Public key fingerprint
+    // TODO: Validate the `signature` field
 }
