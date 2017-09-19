@@ -5,7 +5,7 @@ use std::io::Read;
 
 use super::keytype::KeyType;
 use super::pubkey::PublicKey;
-use super::cursor::Cursor;
+use super::reader::Reader;
 use super::error::{Error, ErrorKind, Result};
 
 use base64;
@@ -62,43 +62,43 @@ impl Certificate {
         let data = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
         let decoded = base64::decode(&data)?;
-        let mut cursor = Cursor::new(&decoded);
+        let mut reader = Reader::new(&decoded);
 
         // Validate key types before reading the rest of the data
-        let kt_from_cursor = cursor.read_string()?;
-        if kt_name != kt_from_cursor {
+        let kt_from_reader = reader.read_string()?;
+        if kt_name != kt_from_reader {
             return Err(Error::with_kind(ErrorKind::KeyTypeMismatch));
         }
 
-        let nonce = cursor.read_bytes()?;
-        let key = PublicKey::from_cursor(&kt_name, &mut cursor)?;
-        let serial = cursor.read_u64()?;
+        let nonce = reader.read_bytes()?;
+        let key = PublicKey::from_reader(&kt_name, &mut reader)?;
+        let serial = reader.read_u64()?;
 
-        let cert_type = match cursor.read_u32()? {
+        let cert_type = match reader.read_u32()? {
             1 => CertType::User,
             2 => CertType::Host,
             n => return Err(Error::with_kind(ErrorKind::InvalidCertType(n))),
         };
 
-        let key_id = cursor.read_string()?;
+        let key_id = reader.read_string()?;
 
-        let buf = cursor.read_bytes()?;
+        let buf = reader.read_bytes()?;
         let principals = read_principals(&buf)?;
 
-        let valid_after = cursor.read_u64()?;
-        let valid_before = cursor.read_u64()?;
+        let valid_after = reader.read_u64()?;
+        let valid_before = reader.read_u64()?;
 
-        let buf = cursor.read_bytes()?;
+        let buf = reader.read_bytes()?;
         let critical_options = read_options(&buf)?;
 
-        let buf = cursor.read_bytes()?;
+        let buf = reader.read_bytes()?;
         let extensions = read_options(&buf)?;
-        let reserved = cursor.read_bytes()?;
+        let reserved = reader.read_bytes()?;
 
-        let buf = cursor.read_bytes()?;
+        let buf = reader.read_bytes()?;
 
         let signature_key = PublicKey::from_bytes(&buf)?;
-        let signature = cursor.read_bytes()?;
+        let signature = reader.read_bytes()?;
 
         let cert = Certificate {
             key_type: kt,
@@ -135,7 +135,7 @@ impl Certificate {
 // in order to extract the associated value we need to read the buffer first and then
 // read the `string` value itself.
 fn read_options(buf: &[u8]) -> Result<HashMap<String, String>> {
-    let mut reader = Cursor::new(&buf);
+    let mut reader = Reader::new(&buf);
     let mut options = HashMap::new();
 
     // Use a `Reader` and loop until EOF is reached, so that we can
@@ -155,7 +155,7 @@ fn read_options(buf: &[u8]) -> Result<HashMap<String, String>> {
         // otherwise we have a `flag` option which is the `empty` string.
         let value_buf = reader.read_bytes()?;
         let value = if value_buf.len() > 0 {
-            Cursor::new(&value_buf).read_string()?
+            Reader::new(&value_buf).read_string()?
         } else {
             "".to_string()
         };
@@ -174,7 +174,7 @@ fn read_options(buf: &[u8]) -> Result<HashMap<String, String>> {
 // This function reads the whole byte slice until EOF is reached in order to
 // ensure all principals are read from the byte slice.
 fn read_principals(buf: &[u8]) -> Result<Vec<String>> {
-    let mut reader = Cursor::new(&buf);
+    let mut reader = Reader::new(&buf);
     let mut items = Vec::new();
 
     loop {

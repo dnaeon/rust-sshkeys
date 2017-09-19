@@ -3,7 +3,7 @@ use std::fs::File;
 use std::path::Path;
 
 use super::keytype::{KeyType, KeyTypeKind};
-use super::cursor::Cursor;
+use super::reader::Reader;
 use super::error::{Error, ErrorKind, Result};
 
 use base64;
@@ -64,16 +64,16 @@ impl PublicKey {
 
         let kt = KeyType::from_name(&kt_name)?;
         let decoded = base64::decode(&data)?;
-        let mut cursor = Cursor::new(&decoded);
+        let mut reader = Reader::new(&decoded);
 
         // Validate key type before reading rest of the data
-        let kt_from_cursor = cursor.read_string()?;
-        if kt_name != kt_from_cursor {
+        let kt_from_reader = reader.read_string()?;
+        if kt_name != kt_from_reader {
             return Err(Error::with_kind(ErrorKind::KeyTypeMismatch))
         }
 
         // Construct a new `PublicKey` value and preserve the `comment` value.
-        let k = PublicKey::from_cursor(&kt_name, &mut cursor)?;
+        let k = PublicKey::from_reader(&kt_name, &mut reader)?;
         let key = PublicKey {
             key_type: kt,
             kind: k.kind,
@@ -87,24 +87,24 @@ impl PublicKey {
     // from an OpenSSH certificate.
     // The byte sequence is expected to be the base64 decoded body of the public key.
     pub fn from_bytes<T: ?Sized + AsRef<[u8]>>(data: &T) -> Result<PublicKey> {
-        let mut cursor = Cursor::new(&data);
-        let kt_name = cursor.read_string()?;
+        let mut reader = Reader::new(&data);
+        let kt_name = reader.read_string()?;
 
-        PublicKey::from_cursor(&kt_name, &mut cursor)
+        PublicKey::from_reader(&kt_name, &mut reader)
     }
 
-    // This function is used for extracting a public key from an existing cursor, e.g.
-    // we already have a cursor for reading an OpenSSH certificate key and
+    // This function is used for extracting a public key from an existing reader, e.g.
+    // we already have a reader for reading an OpenSSH certificate key and
     // we want to extract the public key information from it.
-    pub(crate) fn from_cursor(kt_name: &str, cursor: &mut Cursor) -> Result<PublicKey> {
+    pub(crate) fn from_reader(kt_name: &str, reader: &mut Reader) -> Result<PublicKey> {
         let kt = KeyType::from_name(&kt_name)?;
 
         let kind = match kt.kind {
             KeyTypeKind::KeyRsa     |
             KeyTypeKind::KeyRsaCert => {
                 let k = RsaPublicKey {
-                    e: cursor.read_mpint()?,
-                    n: cursor.read_mpint()?,
+                    e: reader.read_mpint()?,
+                    n: reader.read_mpint()?,
                 };
 
                 PublicKeyKind::Rsa(k)
@@ -112,10 +112,10 @@ impl PublicKey {
             KeyTypeKind::KeyDsa     |
             KeyTypeKind::KeyDsaCert => {
                 let k = DsaPublicKey {
-                    p: cursor.read_mpint()?,
-                    q: cursor.read_mpint()?,
-                    g: cursor.read_mpint()?,
-                    y: cursor.read_mpint()?,
+                    p: reader.read_mpint()?,
+                    q: reader.read_mpint()?,
+                    g: reader.read_mpint()?,
+                    y: reader.read_mpint()?,
                 };
 
                 PublicKeyKind::Dsa(k)
