@@ -2,22 +2,22 @@ use super::error::{Error, ErrorKind, Result};
 
 use byteorder::{BigEndian, ByteOrder};
 
-// A `Cursor` is used for reading and iterating over a
+// A `Reader` is used for reading and iterating over a
 // byte sequence representing an OpenSSH certificate key.
 // The data types used in an OpenSSH certificate key are
 // described in RFC4251 section 5.
-pub struct Cursor<'a> {
+pub struct Reader<'a> {
     inner: &'a [u8],
     offset: usize,
 }
 
-impl<'a> Cursor<'a> {
-    // Creates a new `Cursor` instance from the given slice.
-    pub fn new<T: ?Sized + AsRef<[u8]>>(inner: &T) -> Cursor {
-        Cursor { inner: inner.as_ref(), offset: 0, }
+impl<'a> Reader<'a> {
+    // Creates a new `Reader` instance from the given slice.
+    pub fn new<T: ?Sized + AsRef<[u8]>>(inner: &T) -> Reader {
+        Reader { inner: inner.as_ref(), offset: 0, }
     }
 
-    // Sets the `Cursor` offset to a given position.
+    // Sets the `Reader` offset to a given position.
     pub fn set_offset(&mut self, offset: usize) -> Result<()> {
         self.offset = offset;
 
