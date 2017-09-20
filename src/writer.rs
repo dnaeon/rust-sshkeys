@@ -3,11 +3,13 @@ use super::error::{Error, ErrorKind, Result};
 use base64;
 use byteorder::{BigEndian, ByteOrder, WriteBytesExt};
 
+// A `Writer` is used by encoding a key in OpenSSH compatible format.
 pub struct Writer {
     inner: Vec<u8>,
 }
 
 impl Writer {
+    // Creates a new `Writer` instance.
     pub fn new() -> Writer {
         Writer { inner: Vec::new() }
     }
