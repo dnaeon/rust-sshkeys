@@ -52,7 +52,7 @@ impl<'a> Reader<'a> {
     }
 
     // Reads an `mpint` value from the wrapped byte sequence.
-    // Drops the leading byte if it's value is zero.
+    // Drops the leading byte if it's value is zero according to the RFC 4251, section 5.
     pub fn read_mpint(&mut self) -> Result<Vec<u8>> {
         let bytes = self.read_bytes()?;
 
