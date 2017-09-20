@@ -4,9 +4,11 @@ use std::path::Path;
 
 use super::keytype::{KeyType, KeyTypeKind};
 use super::reader::Reader;
+use super::writer::Writer;
 use super::error::{Error, ErrorKind, Result};
 
 use base64;
+use sha2::{Sha256, Digest};
 
 // The different kinds of public keys.
 #[derive(Debug, PartialEq)]
@@ -144,6 +146,25 @@ impl PublicKey {
             PublicKeyKind::Dsa(ref k) => {
                 k.p.len() * 8
             }
+        }
+    }
+
+    // Encodes the public key in an OpenSSH compatible format
+    pub fn encode(&self) -> Result<String> {
+        let mut w = Writer::new();
+
+        w.write_string(self.key_type.name)?;
+        match self.kind {
+            PublicKeyKind::Rsa(ref k) => {
+                w.write_mpint(&k.e)?;
+                w.write_mpint(&k.n)?;
+            },
+            PublicKeyKind::Dsa(ref k) => {
+                w.write_mpint(&k.p)?;
+                w.write_mpint(&k.q)?;
+                w.write_mpint(&k.g)?;
+                w.write_mpint(&k.y)?;
+            },
         }
     }
 }
