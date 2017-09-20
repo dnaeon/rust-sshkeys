@@ -48,5 +48,9 @@ impl Writer {
         self.write_bytes(&bytes)
     }
 
-    // TODO: Add method for consuming the underlying byte sequence
+    // Converts the `Writer` into a byte sequence.
+    // This consumes the underlying byte sequence used by the `Writer`.
+    pub fn into_bytes(self) -> Vec<u8> {
+        self.inner
+    }
 }
