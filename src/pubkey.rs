@@ -150,7 +150,7 @@ impl PublicKey {
     }
 
     // Encodes the public key in an OpenSSH compatible format
-    pub fn encode(&self) -> Result<String> {
+    pub fn encode(&self) -> Result<Vec<u8>> {
         let mut w = Writer::new();
 
         w.write_string(self.key_type.name)?;
@@ -166,5 +166,7 @@ impl PublicKey {
                 w.write_mpint(&k.y)?;
             },
         }
+
+        Ok(w.into_bytes())
     }
 }
