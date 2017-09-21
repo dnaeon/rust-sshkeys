@@ -4,6 +4,6 @@ version = "0.1.0"
 authors = ["Marin Atanasov Nikolov <dnaeon@gmail.com>"]
 
 [dependencies]
-sha2 = "0.6.0"
 base64 = "0.6.0"
 byteorder = "1.1.0"
+sha2 = "0.6.0"

@@ -8,6 +8,7 @@ use super::writer::Writer;
 use super::error::{Error, ErrorKind, Result};
 
 use base64;
+
 use sha2::{Sha256, Digest};
 
 // The different kinds of public keys.
@@ -168,5 +169,21 @@ impl PublicKey {
         }
 
         Ok(w.into_bytes())
+    }
+
+    // Calculates the fingerprint of the public key using the
+    // default OpenSSH fingerprint representation with Sha256.
+    pub fn fingerprint(&self) -> Result<String> {
+        let data = self.encode()?;
+        let digest = Sha256::digest(&data);
+        let mut encoded = base64::encode(&digest);
+
+        // Trim padding characters from end
+        let fingerprint = match encoded.find('=') {
+            Some(offset) => encoded.drain(..offset).collect(),
+            None         => encoded,
+        };
+
+        Ok(fingerprint)
     }
 }
