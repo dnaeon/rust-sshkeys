@@ -15,12 +15,12 @@ fn test_rsa_pubkey_1024() {
     assert_eq!(key.bits(), 1024);
     assert_eq!(key.comment, None);
 
-    let kind = match key.kind {
-        sshkeys::PublicKeyKind::Rsa(k) => k,
+    match key.kind {
+        sshkeys::PublicKeyKind::Rsa(_) => {},
         _ => panic!("Expected RSA public key"),
-    };
+    }
 
-    // TODO: Test the fingerprint
+    assert_eq!(key.fingerprint().unwrap(), "izTlwvAwZNoPhsSHPFvSWBx7mAnX0regyVjXfQTMv6Y".to_string());
 }
 
 #[test]
@@ -35,12 +35,12 @@ fn test_rsa_pubkey_2048() {
     assert_eq!(key.bits(), 2048);
     assert_eq!(key.comment, Some("me@home".to_string()));
 
-    let kind = match key.kind {
-        sshkeys::PublicKeyKind::Rsa(k) => k,
+    match key.kind {
+        sshkeys::PublicKeyKind::Rsa(_) => {},
         _ => panic!("Expected RSA public key"),
     };
 
-    // TODO: Test the fingerprint
+    assert_eq!(key.fingerprint().unwrap(), "5mDozobgKuNO6/FutOgATBvGfYQbNfBlUY6iBYSdqF0".to_string());
 }
 
 #[test]
