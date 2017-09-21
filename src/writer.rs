@@ -42,8 +42,9 @@ impl Writer {
             None => return Err(Error::with_kind(ErrorKind::InvalidFormat)),
         };
 
-        // Positive mpints must be preceeded by a leading zero byte
-        if msb & 0x80 == 0 {
+        // If most significant bit is set then prepend a zero byte to
+        // avoid interpretation as a negative number.
+        if msb & 0x80 != 0 {
             bytes.insert(0, 0);
         }
 
