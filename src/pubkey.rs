@@ -2,6 +2,7 @@ use std::io::Read;
 use std::fs::File;
 use std::path::Path;
 
+use super::curve::{Curve, CurveKind};
 use super::keytype::{KeyType, KeyTypeKind};
 use super::reader::Reader;
 use super::writer::Writer;
@@ -16,6 +17,7 @@ use sha2::{Sha256, Digest};
 pub enum PublicKeyKind {
     Rsa(RsaPublicKey),
     Dsa(DsaPublicKey),
+    Ecdsa(EcdsaPublicKey),
 }
 
 // TODO: Implement methods on `PublicKeyKind` for displaying key fingerprint
@@ -34,6 +36,13 @@ pub struct DsaPublicKey {
     pub q: Vec<u8>,
     pub g: Vec<u8>,
     pub y: Vec<u8>,
+}
+
+// ECDSA pub key format is described in RFC 5656, section 3.1
+#[derive(Debug, PartialEq)]
+pub struct EcdsaPublicKey {
+    pub curve: Curve,
+    pub key: Vec<u8>,
 }
 
 // Represents a public key in OpenSSH format
@@ -123,8 +132,18 @@ impl PublicKey {
 
                 PublicKeyKind::Dsa(k)
             },
-            // TODO: Implement the rest of the key kinds
-            _ => unimplemented!(),
+            KeyTypeKind::Ecdsa |
+            KeyTypeKind::EcdsaCert => {
+                let identifier = reader.read_string()?;
+                let curve = Curve::from_identifier(&identifier)?;
+                let key = reader.read_bytes()?;
+                let k = EcdsaPublicKey {
+                    curve: curve,
+                    key: key,
+                };
+
+                PublicKeyKind::Ecdsa(k)
+            },
         };
 
         let key = PublicKey {
@@ -146,7 +165,15 @@ impl PublicKey {
             // For DSA public keys the size of the key is the number of bits of the `p` parameter
             PublicKeyKind::Dsa(ref k) => {
                 k.p.len() * 8
-            }
+            },
+            // ECDSA key size depends on the curve
+            PublicKeyKind::Ecdsa(ref k) => {
+                match k.curve.kind {
+                    CurveKind::Nistp256 => 256,
+                    CurveKind::Nistp384 => 384,
+                    CurveKind::Nistp521 => 521,
+                }
+            },
         }
     }
 
@@ -165,6 +192,10 @@ impl PublicKey {
                 w.write_mpint(&k.q)?;
                 w.write_mpint(&k.g)?;
                 w.write_mpint(&k.y)?;
+            },
+            PublicKeyKind::Ecdsa(ref k) => {
+                w.write_string(&k.curve.identifier)?;
+                w.write_bytes(&k.key)?;
             },
         }
 
