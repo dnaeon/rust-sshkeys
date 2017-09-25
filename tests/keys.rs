@@ -8,6 +8,7 @@ fn test_rsa_pubkey_1024() {
     let key = sshkeys::PublicKey::from_path("tests/test-keys/id_rsa_1024.pub").unwrap();
 
     assert_eq!(key.key_type.name, "ssh-rsa");
+    assert_eq!(key.key_type.plain, "ssh-rsa");
     assert_eq!(key.key_type.short_name, "RSA");
     assert_eq!(key.key_type.is_cert, false);
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
@@ -28,6 +29,7 @@ fn test_rsa_pubkey_2048() {
     let key = sshkeys::PublicKey::from_path("tests/test-keys/id_rsa_2048.pub").unwrap();
 
     assert_eq!(key.key_type.name, "ssh-rsa");
+    assert_eq!(key.key_type.plain, "ssh-rsa");
     assert_eq!(key.key_type.short_name, "RSA");
     assert_eq!(key.key_type.is_cert, false);
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
@@ -66,12 +68,14 @@ fn test_rsa_cert() {
     let cert = sshkeys::Certificate::from_path("tests/test-keys/id_rsa_2048-cert.pub").unwrap();
 
     assert_eq!(cert.key_type.name, "ssh-rsa-cert-v01@openssh.com");
+    assert_eq!(cert.key_type.plain, "ssh-rsa");
     assert_eq!(cert.key_type.short_name, "RSA-CERT");
     assert_eq!(cert.key_type.is_cert, true);
     assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::RsaCert);
 
     // Public key part of the certificate
     assert_eq!(cert.key.key_type.name, "ssh-rsa-cert-v01@openssh.com");
+    assert_eq!(cert.key.key_type.plain, "ssh-rsa");
     assert_eq!(cert.key.key_type.short_name, "RSA-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
     assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::RsaCert);
@@ -103,6 +107,7 @@ fn test_rsa_cert() {
     assert_eq!(cert.reserved, Vec::new());
 
     assert_eq!(cert.signature_key.key_type.name, "ssh-rsa");
+    assert_eq!(cert.signature_key.key_type.plain, "ssh-rsa");
     assert_eq!(cert.signature_key.key_type.short_name, "RSA");
     assert_eq!(cert.signature_key.key_type.is_cert, false);
     assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
@@ -128,6 +133,7 @@ fn test_dsa_pubkey_1024() {
     let key = sshkeys::PublicKey::from_path("tests/test-keys/id_dsa_1024.pub").unwrap();
 
     assert_eq!(key.key_type.name, "ssh-dss");
+    assert_eq!(key.key_type.plain, "ssh-dss");
     assert_eq!(key.key_type.short_name, "DSA");
     assert_eq!(key.key_type.is_cert, false);
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Dsa);
@@ -148,11 +154,13 @@ fn test_dsa_cert() {
     let cert = sshkeys::Certificate::from_path("tests/test-keys/id_dsa_1024-cert.pub").unwrap();
 
     assert_eq!(cert.key_type.name, "ssh-dss-cert-v01@openssh.com");
+    assert_eq!(cert.key_type.plain, "ssh-dss");
     assert_eq!(cert.key_type.short_name, "DSA-CERT");
     assert_eq!(cert.key_type.is_cert, true);
     assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::DsaCert);
 
     assert_eq!(cert.key.key_type.name, "ssh-dss-cert-v01@openssh.com");
+    assert_eq!(cert.key.key_type.plain, "ssh-dss");
     assert_eq!(cert.key.key_type.short_name, "DSA-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
     assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::DsaCert);
@@ -182,6 +190,7 @@ fn test_dsa_cert() {
     assert_eq!(cert.reserved, Vec::new());
 
     assert_eq!(cert.signature_key.key_type.name, "ssh-rsa");
+    assert_eq!(cert.signature_key.key_type.plain, "ssh-rsa");
     assert_eq!(cert.signature_key.key_type.short_name, "RSA");
     assert_eq!(cert.signature_key.key_type.is_cert, false);
     assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
