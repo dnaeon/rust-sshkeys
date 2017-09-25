@@ -113,9 +113,8 @@ fn test_rsa_cert() {
     assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
+    assert_eq!(cert.signature_key.fingerprint().unwrap(), "8bEmsdiV2BXhjrzPhp8dPrSLUK3U/YpIXT8NIw6Ym+s");
 
-    // TODO: Fingerprint
-    // TODO: Validate CA Public key fingerprint
     // TODO: Validate the `signature` field
 }
 
@@ -199,7 +198,8 @@ fn test_dsa_cert() {
     assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
-    // TODO: Validate CA Public key fingerprint
+    assert_eq!(cert.signature_key.fingerprint().unwrap(), "8bEmsdiV2BXhjrzPhp8dPrSLUK3U/YpIXT8NIw6Ym+s");
+
     // TODO: Validate the `signature` field
 }
 
@@ -325,6 +325,7 @@ fn test_ecdsa_cert() {
     assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
-    // TODO: Validate CA Public key fingerprint
+    assert_eq!(cert.signature_key.fingerprint().unwrap(), "8bEmsdiV2BXhjrzPhp8dPrSLUK3U/YpIXT8NIw6Ym+s");
+
     // TODO: Validate the `signature` field
 }
