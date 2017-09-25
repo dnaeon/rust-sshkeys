@@ -103,8 +103,8 @@ impl PublicKey {
         let kt = KeyType::from_name(&kt_name)?;
 
         let kind = match kt.kind {
-            KeyTypeKind::KeyRsa     |
-            KeyTypeKind::KeyRsaCert => {
+            KeyTypeKind::Rsa     |
+            KeyTypeKind::RsaCert => {
                 let k = RsaPublicKey {
                     e: reader.read_mpint()?,
                     n: reader.read_mpint()?,
@@ -112,8 +112,8 @@ impl PublicKey {
 
                 PublicKeyKind::Rsa(k)
             },
-            KeyTypeKind::KeyDsa     |
-            KeyTypeKind::KeyDsaCert => {
+            KeyTypeKind::Dsa     |
+            KeyTypeKind::DsaCert => {
                 let k = DsaPublicKey {
                     p: reader.read_mpint()?,
                     q: reader.read_mpint()?,
