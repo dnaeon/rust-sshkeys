@@ -10,7 +10,7 @@ fn test_rsa_pubkey_1024() {
     assert_eq!(key.key_type.name, "ssh-rsa");
     assert_eq!(key.key_type.short_name, "RSA");
     assert_eq!(key.key_type.is_cert, false);
-    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::KeyRsa);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
 
     assert_eq!(key.bits(), 1024);
     assert_eq!(key.comment, None);
@@ -30,7 +30,7 @@ fn test_rsa_pubkey_2048() {
     assert_eq!(key.key_type.name, "ssh-rsa");
     assert_eq!(key.key_type.short_name, "RSA");
     assert_eq!(key.key_type.is_cert, false);
-    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::KeyRsa);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
 
     assert_eq!(key.bits(), 2048);
     assert_eq!(key.comment, Some("me@home".to_string()));
@@ -68,12 +68,16 @@ fn test_rsa_cert() {
     assert_eq!(cert.key_type.name, "ssh-rsa-cert-v01@openssh.com");
     assert_eq!(cert.key_type.short_name, "RSA-CERT");
     assert_eq!(cert.key_type.is_cert, true);
-    assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::KeyRsaCert);
+    assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::RsaCert);
 
+    // Public key part of the certificate
     assert_eq!(cert.key.key_type.name, "ssh-rsa-cert-v01@openssh.com");
     assert_eq!(cert.key.key_type.short_name, "RSA-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
-    assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::KeyRsaCert);
+    assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::RsaCert);
+    assert_eq!(cert.key.bits(), 2048);
+    assert_eq!(cert.key.comment, None);
+    assert_eq!(cert.key.fingerprint().unwrap(), "5mDozobgKuNO6/FutOgATBvGfYQbNfBlUY6iBYSdqF0".to_string());
 
     assert_eq!(cert.serial, 0);
     assert_eq!(cert.cert_type, sshkeys::CertType::User);
@@ -101,9 +105,11 @@ fn test_rsa_cert() {
     assert_eq!(cert.signature_key.key_type.name, "ssh-rsa");
     assert_eq!(cert.signature_key.key_type.short_name, "RSA");
     assert_eq!(cert.signature_key.key_type.is_cert, false);
-    assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::KeyRsa);
+    assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
+
+    // TODO: Fingerprint
     // TODO: Validate CA Public key fingerprint
     // TODO: Validate the `signature` field
 }
@@ -124,7 +130,7 @@ fn test_dsa_pubkey_1024() {
     assert_eq!(key.key_type.name, "ssh-dss");
     assert_eq!(key.key_type.short_name, "DSA");
     assert_eq!(key.key_type.is_cert, false);
-    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::KeyDsa);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Dsa);
 
     assert_eq!(key.bits(), 1024);
     assert_eq!(key.comment, Some("me@home".to_string()));
@@ -144,12 +150,12 @@ fn test_dsa_cert() {
     assert_eq!(cert.key_type.name, "ssh-dss-cert-v01@openssh.com");
     assert_eq!(cert.key_type.short_name, "DSA-CERT");
     assert_eq!(cert.key_type.is_cert, true);
-    assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::KeyDsaCert);
+    assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::DsaCert);
 
     assert_eq!(cert.key.key_type.name, "ssh-dss-cert-v01@openssh.com");
     assert_eq!(cert.key.key_type.short_name, "DSA-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
-    assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::KeyDsaCert);
+    assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::DsaCert);
 
     assert_eq!(cert.serial, 0);
     assert_eq!(cert.cert_type, sshkeys::CertType::User);
@@ -178,7 +184,7 @@ fn test_dsa_cert() {
     assert_eq!(cert.signature_key.key_type.name, "ssh-rsa");
     assert_eq!(cert.signature_key.key_type.short_name, "RSA");
     assert_eq!(cert.signature_key.key_type.is_cert, false);
-    assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::KeyRsa);
+    assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
     // TODO: Validate CA Public key fingerprint
