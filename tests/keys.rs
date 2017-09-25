@@ -21,7 +21,7 @@ fn test_rsa_pubkey_1024() {
         _ => panic!("Expected RSA public key"),
     }
 
-    assert_eq!(key.fingerprint().unwrap(), "izTlwvAwZNoPhsSHPFvSWBx7mAnX0regyVjXfQTMv6Y".to_string());
+    assert_eq!(key.fingerprint().unwrap(), "izTlwvAwZNoPhsSHPFvSWBx7mAnX0regyVjXfQTMv6Y");
 }
 
 #[test]
@@ -42,7 +42,7 @@ fn test_rsa_pubkey_2048() {
         _ => panic!("Expected RSA public key"),
     };
 
-    assert_eq!(key.fingerprint().unwrap(), "5mDozobgKuNO6/FutOgATBvGfYQbNfBlUY6iBYSdqF0".to_string());
+    assert_eq!(key.fingerprint().unwrap(), "5mDozobgKuNO6/FutOgATBvGfYQbNfBlUY6iBYSdqF0");
 }
 
 #[test]
@@ -81,12 +81,12 @@ fn test_rsa_cert() {
     assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::RsaCert);
     assert_eq!(cert.key.bits(), 2048);
     assert_eq!(cert.key.comment, None);
-    assert_eq!(cert.key.fingerprint().unwrap(), "5mDozobgKuNO6/FutOgATBvGfYQbNfBlUY6iBYSdqF0".to_string());
+    assert_eq!(cert.key.fingerprint().unwrap(), "5mDozobgKuNO6/FutOgATBvGfYQbNfBlUY6iBYSdqF0");
 
     assert_eq!(cert.serial, 0);
     assert_eq!(cert.cert_type, sshkeys::CertType::User);
-    assert_eq!(cert.key_id, "john.doe".to_string());
-    assert_eq!(cert.valid_principals, vec!("root".to_string()));
+    assert_eq!(cert.key_id, "john.doe");
+    assert_eq!(cert.valid_principals, vec!("root"));
     assert_eq!(cert.valid_after, 1505374860);
     assert_eq!(cert.valid_before, 1536824561);
 
@@ -167,8 +167,8 @@ fn test_dsa_cert() {
 
     assert_eq!(cert.serial, 0);
     assert_eq!(cert.cert_type, sshkeys::CertType::User);
-    assert_eq!(cert.key_id, "john.doe".to_string());
-    assert_eq!(cert.valid_principals, vec!("root".to_string()));
+    assert_eq!(cert.key_id, "john.doe");
+    assert_eq!(cert.valid_principals, vec!("root"));
 
     assert_eq!(cert.valid_after, 1505475180);
     assert_eq!(cert.valid_before, 1536924895);
@@ -198,4 +198,28 @@ fn test_dsa_cert() {
     assert_eq!(cert.signature_key.comment, None);
     // TODO: Validate CA Public key fingerprint
     // TODO: Validate the `signature` field
+}
+
+#[test]
+pub fn test_ecdsa_nistp256_pubkey() {
+    let key = sshkeys::PublicKey::from_path("tests/test-keys/id_ecdsa_256.pub").unwrap();
+
+    assert_eq!(key.key_type.name, "ecdsa-sha2-nistp256");
+    assert_eq!(key.key_type.plain, "ecdsa-sha2-nistp256");
+    assert_eq!(key.key_type.short_name, "ECDSA");
+    assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ecdsa);
+
+    assert_eq!(key.bits(), 256);
+    assert_eq!(key.comment, Some("me@home".to_string()));
+
+    assert_eq!(key.fingerprint().unwrap(), "RiRAmX+9kOD9dgFhocPtQi726sZXbQ2RmrkXevu6Avg");
+
+    let ecdsa = match key.kind {
+        sshkeys::PublicKeyKind::Ecdsa(ref k) => k,
+        _ => panic!("Expected ECDSA public key"),
+    };
+
+    assert_eq!(ecdsa.curve.identifier, "nistp256");
+    assert_eq!(ecdsa.curve.kind, sshkeys::CurveKind::Nistp256);
 }
