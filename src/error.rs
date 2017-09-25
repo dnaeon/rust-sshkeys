@@ -28,6 +28,7 @@ pub enum ErrorKind {
     NotCertificate,
     KeyTypeMismatch,
     UnknownKeyType(String),
+    UnknownCurve(String),
 }
 
 // A `Result` type alias where the `Err` variant is `Error`
@@ -63,6 +64,7 @@ impl StdError for Error {
             ErrorKind::UnknownKeyType(_)  => "Unknown key type",
             ErrorKind::NotCertificate     => "Not a certificate",
             ErrorKind::KeyTypeMismatch    => "Key type mismatch",
+            ErrorKind::UnknownCurve(_)    => "Unknown curve",
         }
     }
 
@@ -76,6 +78,7 @@ impl StdError for Error {
             ErrorKind::UnexpectedEof      |
             ErrorKind::NotCertificate     |
             ErrorKind::KeyTypeMismatch    |
+            ErrorKind::UnknownCurve(_)    |
             ErrorKind::UnknownKeyType(_)  => None,
         }
     }
@@ -93,6 +96,7 @@ impl fmt::Display for Error {
             ErrorKind::UnknownKeyType(ref v) => write!(f, "Unknown key type {}", v),
             ErrorKind::NotCertificate        => write!(f, "Not a certificate"),
             ErrorKind::KeyTypeMismatch       => write!(f, "Key type mismatch"),
+            ErrorKind::UnknownCurve(ref v)   => write!(f, "Unknown curve {}", v),
         }
     }
 }
