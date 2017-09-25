@@ -146,7 +146,7 @@ fn test_dsa_pubkey_1024() {
         _ => panic!("Expected DSA public key"),
     };
 
-    // TODO: Verify fingerprint of key
+    assert_eq!(key.fingerprint().unwrap(), "i+5TCv/r9PXHeJMeGbgH8xfpgbGsTFFKapQudFR2aFQ");
 }
 
 #[test]
@@ -164,6 +164,9 @@ fn test_dsa_cert() {
     assert_eq!(cert.key.key_type.short_name, "DSA-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
     assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::DsaCert);
+    assert_eq!(cert.key.bits(), 1024);
+    assert_eq!(cert.key.comment, None);
+    assert_eq!(cert.key.fingerprint().unwrap(), "i+5TCv/r9PXHeJMeGbgH8xfpgbGsTFFKapQudFR2aFQ");
 
     assert_eq!(cert.serial, 0);
     assert_eq!(cert.cert_type, sshkeys::CertType::User);
@@ -288,6 +291,9 @@ fn test_ecdsa_cert() {
     assert_eq!(cert.key.key_type.short_name, "ECDSA-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
     assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::EcdsaCert);
+    assert_eq!(cert.key.bits(), 521);
+    assert_eq!(cert.key.comment, None);
+    assert_eq!(cert.key.fingerprint().unwrap(), "kEdMLsbAeJPDv3mEwIchjSxkcL/+XFzI9u1NHCWbsT8");
 
     assert_eq!(cert.serial, 0);
     assert_eq!(cert.cert_type, sshkeys::CertType::User);
