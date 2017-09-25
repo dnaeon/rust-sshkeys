@@ -248,3 +248,27 @@ pub fn test_ecdsa_nistp384_pubkey() {
     assert_eq!(ecdsa.curve.identifier, "nistp384");
     assert_eq!(ecdsa.curve.kind, sshkeys::CurveKind::Nistp384);
 }
+
+#[test]
+pub fn test_ecdsa_nistp521_pubkey() {
+    let key = sshkeys::PublicKey::from_path("tests/test-keys/id_ecdsa_521.pub").unwrap();
+
+    assert_eq!(key.key_type.name, "ecdsa-sha2-nistp521");
+    assert_eq!(key.key_type.plain, "ecdsa-sha2-nistp521");
+    assert_eq!(key.key_type.short_name, "ECDSA");
+    assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ecdsa);
+
+    assert_eq!(key.bits(), 521);
+    assert_eq!(key.comment, Some("me@home".to_string()));
+
+    assert_eq!(key.fingerprint().unwrap(), "kEdMLsbAeJPDv3mEwIchjSxkcL/+XFzI9u1NHCWbsT8");
+
+    let ecdsa = match key.kind {
+        sshkeys::PublicKeyKind::Ecdsa(ref k) => k,
+        _ => panic!("Expected ECDSA public key"),
+    };
+
+    assert_eq!(ecdsa.curve.identifier, "nistp521");
+    assert_eq!(ecdsa.curve.kind, sshkeys::CurveKind::Nistp521);
+}
