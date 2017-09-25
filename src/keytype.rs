@@ -4,16 +4,12 @@ use super::error::{Error, ErrorKind, Result};
 pub enum KeyTypeKind {
     Rsa,
     Dsa,
-    EcdsaNistp256,
-    EcdsaNistp384,
-    EcdsaNistp521,
     Ed25519,
+    Ecdsa,
     RsaCert,
     DsaCert,
-    EcdsaNistp256Cert,
-    EcdsaNistp384Cert,
-    EcdsaNistp521Cert,
     Ed25519Cert,
+    EcdsaCert,
 }
 
 // The `KeyType` represents the type of an OpenSSH key.
@@ -67,7 +63,7 @@ impl KeyType {
                     plain: "ecdsa-sha2-nistp256",
                     short_name: "ECDSA",
                     is_cert: false,
-                    kind: KeyTypeKind::EcdsaNistp256,
+                    kind: KeyTypeKind::Ecdsa,
                 },
             "ecdsa-sha2-nistp384" =>
                 KeyType {
@@ -75,7 +71,7 @@ impl KeyType {
                     plain: "ecdsa-sha2-nistp384",
                     short_name: "ECDSA",
                     is_cert: false,
-                    kind: KeyTypeKind::EcdsaNistp384,
+                    kind: KeyTypeKind::Ecdsa,
                 },
             "ecdsa-sha2-nistp521" =>
                 KeyType {
@@ -83,7 +79,7 @@ impl KeyType {
                     plain: "ecdsa-sha2-nistp521",
                     short_name: "ECDSA",
                     is_cert: false,
-                    kind: KeyTypeKind::EcdsaNistp521,
+                    kind: KeyTypeKind::Ecdsa,
                 },
             "ecdsa-sha2-nistp256-cert-v01@openssh.com" =>
                 KeyType {
@@ -91,7 +87,7 @@ impl KeyType {
                     plain: "ecdsa-sha2-nistp256",
                     short_name: "ECDSA-CERT",
                     is_cert: true,
-                    kind: KeyTypeKind::EcdsaNistp256Cert,
+                    kind: KeyTypeKind::EcdsaCert,
                 },
             "ecdsa-sha2-nistp384-cert-v01@openssh.com" =>
                 KeyType {
@@ -99,7 +95,7 @@ impl KeyType {
                     plain: "ecdsa-sha2-nistp384",
                     short_name: "ECDSA-CERT",
                     is_cert: true,
-                    kind: KeyTypeKind::EcdsaNistp384Cert,
+                    kind: KeyTypeKind::EcdsaCert,
                 },
             "ecdsa-sha2-nistp521-cert-v01@openssh.com" =>
                 KeyType {
@@ -107,7 +103,7 @@ impl KeyType {
                     plain: "ecdsa-sha2-nistp521",
                     short_name: "ECDSA-CERT",
                     is_cert: true,
-                    kind: KeyTypeKind::EcdsaNistp521Cert,
+                    kind: KeyTypeKind::EcdsaCert
                 },
             "ssh-ed25519" =>
                 KeyType {
