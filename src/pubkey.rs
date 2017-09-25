@@ -154,7 +154,7 @@ impl PublicKey {
     pub fn encode(&self) -> Result<Vec<u8>> {
         let mut w = Writer::new();
 
-        w.write_string(self.key_type.name)?;
+        w.write_string(self.key_type.plain)?;
         match self.kind {
             PublicKeyKind::Rsa(ref k) => {
                 w.write_mpint(&k.e)?;
