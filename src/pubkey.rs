@@ -10,7 +10,7 @@ use super::error::{Error, ErrorKind, Result};
 
 use base64;
 
-use sha2::{Sha256, Digest};
+use sha2::{Sha256, Sha384, Sha512, Digest};
 
 // The different kinds of public keys.
 #[derive(Debug, PartialEq)]
@@ -58,6 +58,45 @@ pub struct PublicKey {
     pub key_type: KeyType,
     pub kind: PublicKeyKind,
     pub comment: Option<String>,
+}
+
+// The different fingerprint representations
+pub enum FingerprintKind {
+    Sha256,
+    Sha384,
+    Sha512,
+}
+
+// A type that represents an OpenSSH public key fingerprint
+// TODO: Implement `fmt::Display` trait for this type
+pub struct Fingerprint {
+    pub kind: FingerprintKind,
+    pub hash: String,
+}
+
+impl Fingerprint {
+    pub fn compute<T: AsRef<[u8]>>(kind: FingerprintKind, data: &T) -> Fingerprint {
+        let digest = match kind {
+            FingerprintKind::Sha256 => Sha256::digest(&data.as_ref()).to_vec(),
+            FingerprintKind::Sha384 => Sha384::digest(&data.as_ref()).to_vec(),
+            FingerprintKind::Sha512 => Sha512::digest(&data.as_ref()).to_vec(),
+        };
+
+        let mut encoded = base64::encode(&digest);
+
+        // Trim padding characters from end
+        let hash = match encoded.find('=') {
+            Some(offset) => encoded.drain(..offset).collect(),
+            None         => encoded,
+        };
+
+        let fp = Fingerprint {
+            kind: kind,
+            hash: hash,
+        };
+
+        fp
+    }
 }
 
 impl PublicKey {
