@@ -335,3 +335,28 @@ fn test_ecdsa_cert() {
 
     // TODO: Validate the `signature` field
 }
+
+#[test]
+pub fn test_ed25519_pubkey() {
+    let key = sshkeys::PublicKey::from_path("tests/test-keys/id_ed25519.pub").unwrap();
+
+    assert_eq!(key.key_type.name, "ssh-ed25519");
+    assert_eq!(key.key_type.plain, "ssh-ed25519");
+    assert_eq!(key.key_type.short_name, "ED25519");
+    assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ed25519);
+
+    assert_eq!(key.bits(), 256);
+    assert_eq!(key.comment, Some("me@home".to_string()));
+
+    assert_eq!(key.fingerprint().unwrap(), "ppYFPx0k4Ogs230n6eX9vGPpnNsTB0LPrDWXh1YjClA");
+
+    let ed25519 = match key.kind {
+        sshkeys::PublicKeyKind::Ed25519(ref k) => k,
+        _ => panic!("Expected ED25519 public key"),
+    };
+
+    // Key size should be 32 bytes
+    // https://tools.ietf.org/html/draft-josefsson-eddsa-ed25519-03#section-5.5
+    assert_eq!(ed25519.key.len(), 32);
+}
