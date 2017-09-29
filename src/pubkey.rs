@@ -100,9 +100,6 @@ impl Fingerprint {
 }
 
 impl PublicKey {
-    // TODO: Implement method for displaying the key bits
-    // TODO: Implement method for displaying the key fingerprint
-
     // Reads an OpenSSH public key from a given path.
     pub fn from_path<P: AsRef<Path>>(path: P) -> Result<PublicKey> {
         let mut file = File::open(path)?;
