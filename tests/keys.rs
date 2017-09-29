@@ -115,6 +115,8 @@ fn test_rsa_cert() {
     assert_eq!(cert.signature_key.comment, None);
     assert_eq!(cert.signature_key.fingerprint().unwrap(), "8bEmsdiV2BXhjrzPhp8dPrSLUK3U/YpIXT8NIw6Ym+s");
 
+    assert_eq!(cert.comment, Some("me@home".to_string()));
+
     // TODO: Validate the `signature` field
 }
 
@@ -199,6 +201,8 @@ fn test_dsa_cert() {
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
     assert_eq!(cert.signature_key.fingerprint().unwrap(), "8bEmsdiV2BXhjrzPhp8dPrSLUK3U/YpIXT8NIw6Ym+s");
+
+    assert_eq!(cert.comment, Some("me@home".to_string()));
 
     // TODO: Validate the `signature` field
 }
@@ -326,6 +330,8 @@ fn test_ecdsa_cert() {
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
     assert_eq!(cert.signature_key.fingerprint().unwrap(), "8bEmsdiV2BXhjrzPhp8dPrSLUK3U/YpIXT8NIw6Ym+s");
+
+    assert_eq!(cert.comment, Some("me@home".to_string()));
 
     // TODO: Validate the `signature` field
 }
