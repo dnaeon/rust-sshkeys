@@ -268,6 +268,8 @@ impl PublicKey {
         self.fingerprint_with(FingerprintKind::Sha256)
     }
 
+    // Computes the fingerprint of the public key using a given
+    // fingerprint representation.
     pub fn fingerprint_with(&self, kind: FingerprintKind) -> Result<String> {
         let fp = self.encode().map(|v| Fingerprint::compute(kind, &v))?;
 
