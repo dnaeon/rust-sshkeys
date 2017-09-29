@@ -18,6 +18,7 @@ pub enum PublicKeyKind {
     Rsa(RsaPublicKey),
     Dsa(DsaPublicKey),
     Ecdsa(EcdsaPublicKey),
+    Ed25519(Ed25519PublicKey),
 }
 
 // TODO: Implement methods on `PublicKeyKind` for displaying key fingerprint
@@ -38,10 +39,16 @@ pub struct DsaPublicKey {
     pub y: Vec<u8>,
 }
 
-// ECDSA pub key format is described in RFC 5656, section 3.1
+// ECDSA public key format is described in RFC 5656, section 3.1
 #[derive(Debug, PartialEq)]
 pub struct EcdsaPublicKey {
     pub curve: Curve,
+    pub key: Vec<u8>,
+}
+
+// ED25519 public key format is described in https://tools.ietf.org/html/draft-bjh21-ssh-ed25519-02
+#[derive(Debug, PartialEq)]
+pub struct Ed25519PublicKey {
     pub key: Vec<u8>,
 }
 
@@ -144,6 +151,14 @@ impl PublicKey {
 
                 PublicKeyKind::Ecdsa(k)
             },
+            KeyTypeKind::Ed25519 |
+            KeyTypeKind::Ed25519Cert => {
+                let k = Ed25519PublicKey {
+                    key: reader.read_bytes()?,
+                };
+
+                PublicKeyKind::Ed25519(k)
+            },
         };
 
         let key = PublicKey {
@@ -174,6 +189,9 @@ impl PublicKey {
                     CurveKind::Nistp521 => 521,
                 }
             },
+            // ED25519 key size is 256 bits
+            // https://tools.ietf.org/html/draft-josefsson-eddsa-ed25519-03#section-5.5
+            PublicKeyKind::Ed25519(_) => 256,
         }
     }
 
@@ -195,6 +213,9 @@ impl PublicKey {
             },
             PublicKeyKind::Ecdsa(ref k) => {
                 w.write_string(&k.curve.identifier)?;
+                w.write_bytes(&k.key)?;
+            },
+            PublicKeyKind::Ed25519(ref k) => {
                 w.write_bytes(&k.key)?;
             },
         }
