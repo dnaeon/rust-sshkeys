@@ -235,7 +235,7 @@ impl PublicKey {
     }
 
     // Encodes the public key in an OpenSSH compatible format
-    pub fn encode(&self) -> Result<Vec<u8>> {
+    pub fn encode(&self) -> Vec<u8> {
         let mut w = Writer::new();
 
         w.write_string(self.key_type.plain);
@@ -259,20 +259,18 @@ impl PublicKey {
             },
         }
 
-        Ok(w.into_bytes())
+        w.into_bytes()
     }
 
     // Computes the fingerprint of the public key using the
     // default OpenSSH fingerprint representation with Sha256.
-    pub fn fingerprint(&self) -> Result<String> {
+    pub fn fingerprint(&self) -> Fingerprint {
         self.fingerprint_with(FingerprintKind::Sha256)
     }
 
     // Computes the fingerprint of the public key using a given
     // fingerprint representation.
-    pub fn fingerprint_with(&self, kind: FingerprintKind) -> Result<String> {
-        let fp = self.encode().map(|v| Fingerprint::compute(kind, &v))?;
-
-        Ok(fp.hash)
+    pub fn fingerprint_with(&self, kind: FingerprintKind) -> Fingerprint {
+        Fingerprint::compute(kind, &self.encode())
     }
 }
