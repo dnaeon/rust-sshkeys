@@ -238,43 +238,39 @@ impl PublicKey {
     pub fn encode(&self) -> Result<Vec<u8>> {
         let mut w = Writer::new();
 
-        w.write_string(self.key_type.plain)?;
+        w.write_string(self.key_type.plain);
         match self.kind {
             PublicKeyKind::Rsa(ref k) => {
-                w.write_mpint(&k.e)?;
-                w.write_mpint(&k.n)?;
+                w.write_mpint(&k.e);
+                w.write_mpint(&k.n);
             },
             PublicKeyKind::Dsa(ref k) => {
-                w.write_mpint(&k.p)?;
-                w.write_mpint(&k.q)?;
-                w.write_mpint(&k.g)?;
-                w.write_mpint(&k.y)?;
+                w.write_mpint(&k.p);
+                w.write_mpint(&k.q);
+                w.write_mpint(&k.g);
+                w.write_mpint(&k.y);
             },
             PublicKeyKind::Ecdsa(ref k) => {
-                w.write_string(&k.curve.identifier)?;
-                w.write_bytes(&k.key)?;
+                w.write_string(&k.curve.identifier);
+                w.write_bytes(&k.key);
             },
             PublicKeyKind::Ed25519(ref k) => {
-                w.write_bytes(&k.key)?;
+                w.write_bytes(&k.key);
             },
         }
 
         Ok(w.into_bytes())
     }
 
-    // Calculates the fingerprint of the public key using the
+    // Computes the fingerprint of the public key using the
     // default OpenSSH fingerprint representation with Sha256.
     pub fn fingerprint(&self) -> Result<String> {
-        let data = self.encode()?;
-        let digest = Sha256::digest(&data);
-        let mut encoded = base64::encode(&digest);
+        self.fingerprint_with(FingerprintKind::Sha256)
+    }
 
-        // Trim padding characters from end
-        let fingerprint = match encoded.find('=') {
-            Some(offset) => encoded.drain(..offset).collect(),
-            None         => encoded,
-        };
+    pub fn fingerprint_with(&self, kind: FingerprintKind) -> Result<String> {
+        let fp = self.encode().map(|v| Fingerprint::compute(kind, &v))?;
 
-        Ok(fingerprint)
+        Ok(fp.hash)
     }
 }
