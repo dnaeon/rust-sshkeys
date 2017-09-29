@@ -16,17 +16,15 @@ impl Writer {
     // Writes a byte sequence to the underlying vector.
     // The value is represented as a the byte sequence length,
     // followed by the actual byte sequence.
-    pub fn write_bytes(&mut self, val: &[u8]) -> Result<()> {
+    pub fn write_bytes(&mut self, val: &[u8]) {
         let mut bytes = val.to_vec();
         let size = bytes.len() as u32;
-        self.inner.write_u32::<BigEndian>(size)?;
+        self.inner.write_u32::<BigEndian>(size);
         self.inner.append(&mut bytes);
-
-        Ok(())
     }
 
     // Writes a `string` value to the underlying byte sequence.
-    pub fn write_string(&mut self, val: &str) -> Result<()> {
+    pub fn write_string(&mut self, val: &str) {
         self.write_bytes(val.as_bytes())
     }
 
@@ -34,16 +32,12 @@ impl Writer {
     // If the MSB bit of the first byte is set then the number is
     // negative, otherwise it is positive.
     // Positive numbers must be preceeded by a leading zero byte according to RFC 4251, section 5.
-    pub fn write_mpint(&mut self, val: &[u8]) -> Result<()> {
+    pub fn write_mpint(&mut self, val: &[u8]) {
         let mut bytes = val.to_vec();
-        let msb = match val.get(0) {
-            Some(x) => x,
-            None => return Err(Error::with_kind(ErrorKind::InvalidFormat)),
-        };
 
         // If most significant bit is set then prepend a zero byte to
         // avoid interpretation as a negative number.
-        if msb & 0x80 != 0 {
+        if val.get(0).unwrap_or(&0) & 0x80 != 0 {
             bytes.insert(0, 0);
         }
 
