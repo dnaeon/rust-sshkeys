@@ -1,4 +1,5 @@
 use std::io::Read;
+use std::fmt;
 use std::fs::File;
 use std::path::Path;
 
@@ -60,18 +61,47 @@ pub struct PublicKey {
     pub comment: Option<String>,
 }
 
+impl fmt::Display for PublicKey {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let comment = match self.comment {
+            Some(ref c) => c,
+            None        => "",
+        };
+
+        write!(f, "{} {} {} ({})", self.bits(), self.fingerprint(), comment, self.key_type.short_name)
+    }
+}
+
 // The different fingerprint representations
+#[derive(Debug, PartialEq)]
 pub enum FingerprintKind {
     Sha256,
     Sha384,
     Sha512,
 }
 
+impl fmt::Display for FingerprintKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let kind = match *self {
+            FingerprintKind::Sha256 => "SHA256",
+            FingerprintKind::Sha384 => "SHA384",
+            FingerprintKind::Sha512 => "SHA512",
+        };
+
+        write!(f, "{}", kind)
+    }
+}
+
 // A type that represents an OpenSSH public key fingerprint
-// TODO: Implement `fmt::Display` trait for this type
 pub struct Fingerprint {
     pub kind: FingerprintKind,
     pub hash: String,
+}
+
+impl fmt::Display for Fingerprint {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}:{}", self.kind, self.hash)
+    }
 }
 
 impl Fingerprint {
