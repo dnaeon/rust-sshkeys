@@ -35,6 +35,7 @@ pub struct Certificate {
     pub reserved: Vec<u8>,
     pub signature_key: PublicKey,
     pub signature: Vec<u8>,
+    pub comment: Option<String>,
 }
 
 impl Certificate {
@@ -60,6 +61,7 @@ impl Certificate {
         }
 
         let data = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
+        let comment = iter.next().map(|v| String::from(v));
 
         let decoded = base64::decode(&data)?;
         let mut reader = Reader::new(&decoded);
@@ -115,6 +117,7 @@ impl Certificate {
             reserved: reserved,
             signature_key: signature_key,
             signature: signature,
+            comment: comment,
         };
 
         Ok(cert)
