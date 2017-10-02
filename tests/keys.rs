@@ -488,3 +488,80 @@ pub fn test_ed25519_pubkey() {
     // https://tools.ietf.org/html/draft-josefsson-eddsa-ed25519-03#section-5.5
     assert_eq!(ed25519.key.len(), 32);
 }
+
+#[test]
+pub fn test_ed25519_cert() {
+    let cert = sshkeys::Certificate::from_path("tests/test-keys/id_ed25519-cert.pub").unwrap();
+
+    assert_eq!(cert.key_type.name, "ssh-ed25519-cert-v01@openssh.com");
+    assert_eq!(cert.key_type.plain, "ssh-ed25519");
+    assert_eq!(cert.key_type.short_name, "ED25519-CERT");
+    assert_eq!(cert.key_type.is_cert, true);
+    assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::Ed25519Cert);
+
+    // Public key part of the certificate
+    assert_eq!(cert.key.key_type.name, "ssh-ed25519-cert-v01@openssh.com");
+    assert_eq!(cert.key.key_type.plain, "ssh-ed25519");
+    assert_eq!(cert.key.key_type.short_name, "ED25519-CERT");
+    assert_eq!(cert.key.key_type.is_cert, true);
+    assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::Ed25519Cert);
+    assert_eq!(cert.key.bits(), 256);
+    assert_eq!(cert.key.comment, None);
+
+    let sha256fp = cert.key.fingerprint_with(sshkeys::FingerprintKind::Sha256);
+    let sha384fp = cert.key.fingerprint_with(sshkeys::FingerprintKind::Sha384);
+    let sha512fp = cert.key.fingerprint_with(sshkeys::FingerprintKind::Sha512);
+
+    assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
+    assert_eq!(sha256fp.hash, "ppYFPx0k4Ogs230n6eX9vGPpnNsTB0LPrDWXh1YjClA");
+    assert_eq!(sha384fp.kind, sshkeys::FingerprintKind::Sha384);
+    assert_eq!(sha384fp.hash, "B4spD+NiA6esYoqr6dx+w0wBI3p3rQJsTku1rXIWGXTO87W1vvTKMFpwUOdNST2h");
+    assert_eq!(sha512fp.kind, sshkeys::FingerprintKind::Sha512);
+    assert_eq!(sha512fp.hash, "ljOfAT2lmNZbMDGNwNiLH/dPFIu+euUdXHP+5m0IobCBFYdg7mv8ltqtDBP2vP9vUcOWOow90EQoTPR4oZR1Nw");
+
+    assert_eq!(cert.serial, 0);
+    assert_eq!(cert.cert_type, sshkeys::CertType::User);
+    assert_eq!(cert.key_id, "john.doe");
+    assert_eq!(cert.valid_principals, vec!("root"));
+
+    assert_eq!(cert.valid_after, 1506934140);
+    assert_eq!(cert.valid_before, 1538383841);
+
+    let mut co = HashMap::new();
+    co.insert("force-command".to_string(), "/usr/bin/true".to_string());
+    assert_eq!(cert.critical_options, co);
+
+    let mut extensions = HashMap::new();
+    extensions.insert("permit-X11-forwarding".to_string(), "".to_string());
+    extensions.insert("permit-agent-forwarding".to_string(), "".to_string());
+    extensions.insert("permit-port-forwarding".to_string(), "".to_string());
+    extensions.insert("permit-pty".to_string(), "".to_string());
+    extensions.insert("permit-user-rc".to_string(), "".to_string());
+    assert_eq!(cert.extensions, extensions);
+
+    // The `reserved` field is empty in the current implementation of OpenSSH certificates
+    assert_eq!(cert.reserved, Vec::new());
+
+    // CA public key
+    assert_eq!(cert.signature_key.key_type.name, "ssh-rsa");
+    assert_eq!(cert.signature_key.key_type.plain, "ssh-rsa");
+    assert_eq!(cert.signature_key.key_type.short_name, "RSA");
+    assert_eq!(cert.signature_key.key_type.is_cert, false);
+    assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
+    assert_eq!(cert.signature_key.bits(), 2048);
+    assert_eq!(cert.signature_key.comment, None);
+
+    let sha256fp = cert.signature_key.fingerprint_with(sshkeys::FingerprintKind::Sha256);
+    let sha384fp = cert.signature_key.fingerprint_with(sshkeys::FingerprintKind::Sha384);
+    let sha512fp = cert.signature_key.fingerprint_with(sshkeys::FingerprintKind::Sha512);
+    assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
+    assert_eq!(sha256fp.hash, "8bEmsdiV2BXhjrzPhp8dPrSLUK3U/YpIXT8NIw6Ym+s");
+    assert_eq!(sha384fp.kind, sshkeys::FingerprintKind::Sha384);
+    assert_eq!(sha384fp.hash, "7+2ZLPaqbntHUtypie8404NhIIqgo9b6/XWNABjgTphWic38/EDYXYm35SLllIxm");
+    assert_eq!(sha512fp.kind, sshkeys::FingerprintKind::Sha512);
+    assert_eq!(sha512fp.hash, "BrQgwbsBLlnyiOGITMfl+H2I7HCcCYiy22Hx0j62bWvifyZLyGA5PIoId+846U1P31cMX77l9Ok0qh9meltGCw");
+
+    assert_eq!(cert.comment, Some("me@home".to_string()));
+
+    // TODO: Validate the `signature` field
+}
