@@ -82,7 +82,7 @@ fn test_rsa_pubkey_2048_unknown_keytype() {
 }
 
 #[test]
-fn test_rsa_cert() {
+fn test_rsa_user_cert() {
     let cert = sshkeys::Certificate::from_path("tests/test-keys/id_rsa_2048-cert.pub").unwrap();
 
     assert_eq!(cert.key_type.name, "ssh-rsa-cert-v01@openssh.com");
@@ -201,7 +201,7 @@ fn test_dsa_pubkey_1024() {
 }
 
 #[test]
-fn test_dsa_cert() {
+fn test_dsa_user_cert() {
     let cert = sshkeys::Certificate::from_path("tests/test-keys/id_dsa_1024-cert.pub").unwrap();
 
     assert_eq!(cert.key_type.name, "ssh-dss-cert-v01@openssh.com");
@@ -380,7 +380,7 @@ pub fn test_ecdsa_nistp521_pubkey() {
 }
 
 #[test]
-fn test_ecdsa_cert() {
+fn test_ecdsa_user_cert() {
     let cert = sshkeys::Certificate::from_path("tests/test-keys/id_ecdsa_521-cert.pub").unwrap();
 
     assert_eq!(cert.key_type.name, "ecdsa-sha2-nistp521-cert-v01@openssh.com");
@@ -490,7 +490,7 @@ pub fn test_ed25519_pubkey() {
 }
 
 #[test]
-pub fn test_ed25519_cert() {
+pub fn test_ed25519_user_cert() {
     let cert = sshkeys::Certificate::from_path("tests/test-keys/id_ed25519-cert.pub").unwrap();
 
     assert_eq!(cert.key_type.name, "ssh-ed25519-cert-v01@openssh.com");
@@ -565,3 +565,77 @@ pub fn test_ed25519_cert() {
 
     // TODO: Validate the `signature` field
 }
+
+#[test]
+fn test_ed25519_host_cert() {
+    let cert = sshkeys::Certificate::from_path("tests/test-keys/id_ed25519_host-cert.pub").unwrap();
+
+    assert_eq!(cert.key_type.name, "ssh-ed25519-cert-v01@openssh.com");
+    assert_eq!(cert.key_type.plain, "ssh-ed25519");
+    assert_eq!(cert.key_type.short_name, "ED25519-CERT");
+    assert_eq!(cert.key_type.is_cert, true);
+    assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::Ed25519Cert);
+
+    // Public key part of the certificate
+    assert_eq!(cert.key.key_type.name, "ssh-ed25519-cert-v01@openssh.com");
+    assert_eq!(cert.key.key_type.plain, "ssh-ed25519");
+    assert_eq!(cert.key.key_type.short_name, "ED25519-CERT");
+    assert_eq!(cert.key.key_type.is_cert, true);
+    assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::Ed25519Cert);
+    assert_eq!(cert.key.bits(), 256);
+    assert_eq!(cert.key.comment, None);
+
+    let sha256fp = cert.key.fingerprint_with(sshkeys::FingerprintKind::Sha256);
+    let sha384fp = cert.key.fingerprint_with(sshkeys::FingerprintKind::Sha384);
+    let sha512fp = cert.key.fingerprint_with(sshkeys::FingerprintKind::Sha512);
+
+    assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
+    assert_eq!(sha256fp.hash, "kkaqMnJz4XAhwz7n7Ov8RbHEYIJ8sxyGQWDmM5Ckot0");
+    assert_eq!(sha384fp.kind, sshkeys::FingerprintKind::Sha384);
+    assert_eq!(sha384fp.hash, "vGjciz1R26zOHfZ8Vv8m2O7Cz7HxHKWbfuev/LbznWlOWuAqLl1QuuDk/oqhSxKr");
+    assert_eq!(sha512fp.kind, sshkeys::FingerprintKind::Sha512);
+    assert_eq!(sha512fp.hash, "NCUwuFl6hLiLLX9TUVwmaLjD5q4ql1ayGciFBklt3GYdQzLpX8sLMMBEgcrUgEfZjQtF18d3mNWbEx/okW6Vqw");
+
+    assert_eq!(cert.serial, 0);
+    assert_eq!(cert.cert_type, sshkeys::CertType::Host);
+    assert_eq!(cert.key_id, "host01");
+    assert_eq!(cert.valid_principals, vec!("host01.example.com"));
+
+    assert_eq!(cert.valid_after, 1506936000);
+    assert_eq!(cert.valid_before, 1538385716);
+
+    // No critical options are defined for host certificates
+    let mut co = HashMap::new();
+    assert_eq!(cert.critical_options, co);
+
+    // No extensions are defined for host certificates
+    let mut extensions = HashMap::new();
+    assert_eq!(cert.extensions, extensions);
+
+    // The `reserved` field is empty in the current implementation of OpenSSH certificates
+    assert_eq!(cert.reserved, Vec::new());
+
+    // CA public key
+    assert_eq!(cert.signature_key.key_type.name, "ssh-ed25519");
+    assert_eq!(cert.signature_key.key_type.plain, "ssh-ed25519");
+    assert_eq!(cert.signature_key.key_type.short_name, "ED25519");
+    assert_eq!(cert.signature_key.key_type.is_cert, false);
+    assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Ed25519);
+    assert_eq!(cert.signature_key.bits(), 256);
+    assert_eq!(cert.signature_key.comment, None);
+
+    let sha256fp = cert.signature_key.fingerprint_with(sshkeys::FingerprintKind::Sha256);
+    let sha384fp = cert.signature_key.fingerprint_with(sshkeys::FingerprintKind::Sha384);
+    let sha512fp = cert.signature_key.fingerprint_with(sshkeys::FingerprintKind::Sha512);
+    assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
+    assert_eq!(sha256fp.hash, "elYqUIgEUqMyc8AdNNk+IeI+2l1vWEh4K4n03hqhoD8");
+    assert_eq!(sha384fp.kind, sshkeys::FingerprintKind::Sha384);
+    assert_eq!(sha384fp.hash, "XPQbeB2kZcG3AUIjIq2wtUDMQYS/Iy0G6trb4XH97zzi4MK+YUqEdx7BAKkZYs0u");
+    assert_eq!(sha512fp.kind, sshkeys::FingerprintKind::Sha512);
+    assert_eq!(sha512fp.hash, "nIa7CBs7SST41mSeHA7/69y7yy9y3Ec7W6JQKWJsgsBNbY3hq8WiPaa00z5q0AEgC+TO4MK56MoYY2PsE997zw");
+
+    assert_eq!(cert.comment, Some("me@home".to_string()));
+
+    // TODO: Validate the `signature` field
+}
+
