@@ -16,5 +16,5 @@ pub use self::cert::{CertType, Certificate};
 pub use self::reader::Reader;
 pub use self::writer::Writer;
 pub use self::error::{Error, ErrorKind, Result};
-pub use self::pubkey::{PublicKey, PublicKeyKind, RsaPublicKey, DsaPublicKey, EcdsaPublicKey};
+pub use self::pubkey::{PublicKey, PublicKeyKind, RsaPublicKey, DsaPublicKey, EcdsaPublicKey, Ed25519PublicKey, Fingerprint, FingerprintKind};
 pub use self::keytype::{KeyType, KeyTypeKind};
