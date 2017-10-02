@@ -1,5 +1,3 @@
-use super::error::{Error, ErrorKind, Result};
-
 use byteorder::{BigEndian, ByteOrder, WriteBytesExt};
 
 // A `Writer` is used by encoding a key in OpenSSH compatible format.
