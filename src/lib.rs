@@ -1,3 +1,7 @@
+#![deny(warnings)]
+#![deny(missing_docs)]
+#![deny(missing_debug_implementations)]
+
 extern crate base64;
 extern crate byteorder;
 extern crate sha2;
