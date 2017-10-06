@@ -10,36 +10,80 @@ use super::error::{Error, ErrorKind, Result};
 
 use base64;
 
-// `CertType` represents the valid types a certificate can be.
+/// Represents the different certificate types.
 #[derive(Debug, PartialEq)]
 pub enum CertType {
+    /// Represents a user certificate
     User,
+
+    /// Represents a host certificate
     Host
 }
 
-// A type which represents an OpenSSH Certificate key.
-// https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.certkeys
+/// A type which represents an OpenSSH certificate key.
+/// https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.certkeys
 #[derive(Debug)]
 pub struct Certificate {
+    /// The type of certificate.
     pub key_type: KeyType,
+
+    /// Key nonce.
     pub nonce: Vec<u8>,
+
+    /// Public key part of the certificate.
     pub key: PublicKey,
+
+    /// Serial number of certificate.
     pub serial: u64,
+
+    /// Represents the type of the certificate.
     pub cert_type: CertType,
+
+    /// Key identity.
     pub key_id: String,
+
+    /// The list of valid principals for the certificate.
     pub valid_principals: Vec<String>,
+
+    /// Time after which certificate is considered as valid.
     pub valid_after: u64,
+
+    /// Time before which certificate is considered as valid.
     pub valid_before: u64,
+
+    /// Critical options of the certificate. Generally used to
+    /// control features which restrict access.
     pub critical_options: HashMap<String, String>,
+
+    /// Certificate extensions. Extensions are usually used to
+    /// enable features that grant access.
     pub extensions: HashMap<String, String>,
+
+    /// Reserved field is currently unused and is ignored in this version of the protocol.
     pub reserved: Vec<u8>,
+
+    /// Signature key contains the CA key used to sign the certificate.
     pub signature_key: PublicKey,
+
+    /// Signature of the certificate.
     pub signature: Vec<u8>,
+
+    /// Certificate comment, if any.
     pub comment: Option<String>,
 }
 
 impl Certificate {
-    // Reads an OpenSSH certificate key from a given path.
+    /// Reads an OpenSSH certificate key from a given path.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use sshkeys;
+    /// # fn example() -> sshkeys::Result<()> {
+    /// let cert = sshkeys::Certificate::from_path("/path/to/my-public-key.pub")?;
+    /// # Ok(());
+    /// # }
+    /// ```
     pub fn from_path<P: AsRef<Path>>(path: P) -> Result<Certificate> {
         let mut file = File::open(path)?;
 
@@ -49,7 +93,17 @@ impl Certificate {
         Certificate::from_string(&contents)
     }
 
-    // Reads an OpenSSH certificate key from the given string.
+    /// Reads an OpenSSH certificate key from a given string.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use sshkeys;
+    /// # fn example() -> sshkeys::Result<()> {
+    /// let cert = sshkeys::Certificate::from_string("ssh-rsa AAAAB3NzaC1yc2EAAAA...")?;
+    /// # Ok(());
+    /// # }
+    /// ```
     pub fn from_string(s: &str) -> Result<Certificate> {
         let mut iter = s.split_whitespace();
 
@@ -186,7 +240,7 @@ fn read_principals(buf: &[u8]) -> Result<Vec<String>> {
             Err(e) => {
                 match e.kind {
                     ErrorKind::UnexpectedEof => break,
-                    _                   => return Err(e),
+                    _                        => return Err(e),
                 }
             },
         };
