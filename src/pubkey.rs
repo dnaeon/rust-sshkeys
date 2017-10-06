@@ -13,51 +13,79 @@ use base64;
 
 use sha2::{Sha256, Sha384, Sha512, Digest};
 
-// The different kinds of public keys.
+/// A type which represents the different kinds a public key can be.
 #[derive(Debug, PartialEq)]
 pub enum PublicKeyKind {
+    /// Represents a RSA public key.
     Rsa(RsaPublicKey),
+
+    /// Represents a DSA public key.
     Dsa(DsaPublicKey),
+
+    /// Represents a ECDSA public key.
     Ecdsa(EcdsaPublicKey),
+
+    /// Represents a ED25519 public key.
     Ed25519(Ed25519PublicKey),
 }
 
-// TODO: Implement methods on `PublicKeyKind` for displaying key fingerprint
-
-// RSA public key format is described in RFC 4253, section 6.6
+/// RSA public key.
+/// The format of RSA public key is described in RFC 4253, section 6.6
 #[derive(Debug, PartialEq)]
 pub struct RsaPublicKey {
+    /// Exponent of key.
     pub e: Vec<u8>,
+
+    /// Modulus of key.
     pub n: Vec<u8>,
 }
 
-// DSA public key format is described in RFC 4253, section 6.6
+/// DSA public key.
+/// The format of DSA public key is described in RFC 4253, section 6.6
 #[derive(Debug, PartialEq)]
 pub struct DsaPublicKey {
+    /// Parameter `p`.
     pub p: Vec<u8>,
+
+    /// Parameter `q`.
     pub q: Vec<u8>,
+
+    /// Parameter `g`.
     pub g: Vec<u8>,
+
+    /// Parameter `y`.
     pub y: Vec<u8>,
 }
 
-// ECDSA public key format is described in RFC 5656, section 3.1
+/// ECDSA public key.
+/// The format of ECDSA public keys is described in RFC 5656, section 3.1.
 #[derive(Debug, PartialEq)]
 pub struct EcdsaPublicKey {
+    /// The curve being used.
     pub curve: Curve,
+
+    /// The public key.
     pub key: Vec<u8>,
 }
 
-// ED25519 public key format is described in https://tools.ietf.org/html/draft-bjh21-ssh-ed25519-02
+/// ED25519 public key.
+/// The format of ED25519 public keys is described in https://tools.ietf.org/html/draft-bjh21-ssh-ed25519-02
 #[derive(Debug, PartialEq)]
 pub struct Ed25519PublicKey {
+    /// The public key.
     pub key: Vec<u8>,
 }
 
-// Represents a public key in OpenSSH format
+/// A type which represents an OpenSSH public key.
 #[derive(Debug)]
 pub struct PublicKey {
+    /// Type of public key.
     pub key_type: KeyType,
+
+    /// The kind of public key.
     pub kind: PublicKeyKind,
+
+    /// Associated comment, if any.
     pub comment: Option<String>,
 }
 
@@ -72,11 +100,14 @@ impl fmt::Display for PublicKey {
     }
 }
 
-// The different fingerprint representations
+/// The `FingerprintKind` enum represents the different fingerprint representation.
 #[derive(Debug, PartialEq)]
 pub enum FingerprintKind {
+    /// A kind used to represent the fingerprint using SHA256.
     Sha256,
+    /// A kind used to represent the fingerprint using SHA384.
     Sha384,
+    /// A kind used to represent the fingerprint using SHA512.
     Sha512,
 }
 
@@ -92,9 +123,12 @@ impl fmt::Display for FingerprintKind {
     }
 }
 
-// A type that represents an OpenSSH public key fingerprint
+/// A type that represents an OpenSSH public key fingerprint.
 pub struct Fingerprint {
+    /// The kind used to represent the fingerprint.
     pub kind: FingerprintKind,
+
+    /// The computed fingerprint.
     pub hash: String,
 }
 
@@ -105,6 +139,7 @@ impl fmt::Display for Fingerprint {
 }
 
 impl Fingerprint {
+    /// Computes the fingerprint of a public key using the given fingerprint representation.
     pub fn compute<T: AsRef<[u8]>>(kind: FingerprintKind, data: &T) -> Fingerprint {
         let digest = match kind {
             FingerprintKind::Sha256 => Sha256::digest(&data.as_ref()).to_vec(),
@@ -130,7 +165,14 @@ impl Fingerprint {
 }
 
 impl PublicKey {
-    // Reads an OpenSSH public key from a given path.
+    /// Reads an OpenSSH public key from a given path.
+    ///
+    /// # Examples
+    /// ```rust
+    /// # fn example() -> sshkeys::Result<()> {
+    /// let key = sshkeys::PublicKey::from_path("/path/to/public-key.pub")?;
+    /// # Ok(());
+    /// # }
     pub fn from_path<P: AsRef<Path>>(path: P) -> Result<PublicKey> {
         let mut file = File::open(path)?;
         let mut contents = String::new();
@@ -139,7 +181,10 @@ impl PublicKey {
         PublicKey::from_string(&contents)
     }
 
-    // Reads an OpenSSH public key from the given string.
+    /// Reads an OpenSSH public key from a given string.
+    ///
+    /// # Examples
+    /// TODO: Add example
     pub fn from_string(contents: &str) -> Result<PublicKey> {
         let mut iter = contents.split_whitespace();
 
@@ -147,6 +192,7 @@ impl PublicKey {
         let data = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
         let comment = iter.next().map(|v| String::from(v));
 
+        // TODO: Check if we can use `map` here instead.
         let kt = KeyType::from_name(&kt_name)?;
         let decoded = base64::decode(&data)?;
         let mut reader = Reader::new(&decoded);
@@ -168,9 +214,8 @@ impl PublicKey {
         Ok(key)
     }
 
-    // Reads a public key from the given byte sequence, e.g. a public key extracted
-    // from an OpenSSH certificate.
-    // The byte sequence is expected to be the base64 decoded body of the public key.
+    /// Reads a public key from a given byte sequence.
+    /// The byte sequence is expected to be the base64 decoded body of the public key.
     pub fn from_bytes<T: ?Sized + AsRef<[u8]>>(data: &T) -> Result<PublicKey> {
         let mut reader = Reader::new(&data);
         let kt_name = reader.read_string()?;
@@ -236,7 +281,8 @@ impl PublicKey {
         Ok(key)
     }
 
-    // Returns the number of bits of the public key
+    /// Returns the number of bits of the public key.
+    /// TODO: Add examples
     pub fn bits(&self) -> usize {
         match self.kind {
             // For RSA public key the size of the key is the number of bits of the modulus
@@ -261,7 +307,8 @@ impl PublicKey {
         }
     }
 
-    // Encodes the public key in an OpenSSH compatible format
+    /// Encodes the public key in an OpenSSH compatible format.
+    /// TODO: Add examples
     pub fn encode(&self) -> Vec<u8> {
         let mut w = Writer::new();
 
@@ -289,14 +336,14 @@ impl PublicKey {
         w.into_bytes()
     }
 
-    // Computes the fingerprint of the public key using the
-    // default OpenSSH fingerprint representation with Sha256.
+    /// Computes the fingerprint of the public key using the
+    // default OpenSSH fingerprint representation with SHA256.
     pub fn fingerprint(&self) -> Fingerprint {
         self.fingerprint_with(FingerprintKind::Sha256)
     }
 
-    // Computes the fingerprint of the public key using a given
-    // fingerprint representation.
+    /// Computes the fingerprint of the public key using a given
+    /// fingerprint representation.
     pub fn fingerprint_with(&self, kind: FingerprintKind) -> Fingerprint {
         Fingerprint::compute(kind, &self.encode())
     }
