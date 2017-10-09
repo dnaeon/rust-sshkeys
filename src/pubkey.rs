@@ -3,7 +3,6 @@ use std::fmt;
 use std::fs::File;
 use std::path::Path;
 
-use super::curve::{Curve, CurveKind};
 use super::keytype::{KeyType, KeyTypeKind};
 use super::reader::Reader;
 use super::writer::Writer;
@@ -151,8 +150,10 @@ impl fmt::Display for PublicKey {
 pub enum FingerprintKind {
     /// A kind used to represent the fingerprint using SHA256.
     Sha256,
+
     /// A kind used to represent the fingerprint using SHA384.
     Sha384,
+
     /// A kind used to represent the fingerprint using SHA512.
     Sha512,
 }
@@ -219,6 +220,7 @@ impl PublicKey {
     /// let key = sshkeys::PublicKey::from_path("/path/to/public-key.pub")?;
     /// # Ok(());
     /// # }
+    /// ```
     pub fn from_path<P: AsRef<Path>>(path: P) -> Result<PublicKey> {
         let mut file = File::open(path)?;
         let mut contents = String::new();
@@ -383,7 +385,7 @@ impl PublicKey {
     }
 
     /// Computes the fingerprint of the public key using the
-    // default OpenSSH fingerprint representation with SHA256.
+    /// default OpenSSH fingerprint representation with SHA256.
     pub fn fingerprint(&self) -> Fingerprint {
         self.fingerprint_with(FingerprintKind::Sha256)
     }
