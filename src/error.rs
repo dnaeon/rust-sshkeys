@@ -3,20 +3,20 @@ use std::error::Error as StdError;
 
 use base64;
 
-// The `Error` type represents the possible errors that may occur when
-// dealing with OpenSSH keys.
+/// The `Error` type represents the possible errors that may occur when
+/// dealing with OpenSSH keys.
 #[derive(Debug)]
 pub struct Error {
     pub(crate) kind: ErrorKind,
 }
 
 impl Error {
-    // TODO: Make this associated function only public to the crate?
-    pub fn with_kind(kind: ErrorKind) -> Error {
+    pub(crate) fn with_kind(kind: ErrorKind) -> Error {
         Error { kind: kind }
     }
 }
 
+/// A type to represent the different kinds of errors.
 #[derive(Debug)]
 pub enum ErrorKind {
     Io(io::Error),
@@ -31,7 +31,7 @@ pub enum ErrorKind {
     UnknownCurve(String),
 }
 
-// A `Result` type alias where the `Err` variant is `Error`
+/// A `Result` type alias where the `Err` variant is `Error`
 pub type Result<T> = result::Result<T, Error>;
 
 impl From<io::Error> for Error {
