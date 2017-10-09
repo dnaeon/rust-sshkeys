@@ -4,6 +4,7 @@ use byteorder::{BigEndian, ByteOrder};
 
 /// A `Reader` is used for reading from a byte sequence
 /// representing an encoded OpenSSH public key or certificate.
+#[derive(Debug)]
 pub struct Reader<'a> {
     inner: &'a [u8],
     offset: usize,
