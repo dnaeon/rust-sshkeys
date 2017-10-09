@@ -1,28 +1,63 @@
 use super::error::{Error, ErrorKind, Result};
 
+/// An enum which represents the different kinds of key types.
 #[derive(Debug, PartialEq)]
 pub enum KeyTypeKind {
+    /// Represents a RSA key type.
     Rsa,
+
+    /// Represents a DSA key type.
     Dsa,
+
+    /// Represents a ED25519 key type.
     Ed25519,
+
+    /// Represents a ECDSA key type.
     Ecdsa,
+
+    /// Represents a RSA certificate key type.
     RsaCert,
+
+    /// Represents a DSA certificate key type.
     DsaCert,
+
+    /// Represents a ED25519 certificate key type.
     Ed25519Cert,
+
+    /// Represents a ECDSA certificate key type.
     EcdsaCert,
 }
 
-// The `KeyType` represents the type of an OpenSSH key.
+/// A type which represents the type of an OpenSSH key.
 #[derive(Debug)]
 pub struct KeyType {
+    /// Name of the key type.
     pub name: &'static str,
+
+    /// Short name of the key type.
     pub short_name: &'static str,
+
+    /// Indicates whether the key type represents a certificate or not.
     pub is_cert: bool,
+
+    /// Kind of the key type.
     pub kind: KeyTypeKind,
-    pub plain: &'static str, // The cert-less equivalent to a certified key type
+
+    /// The cert-less equivalent to a certified key type.
+    pub plain: &'static str,
 }
 
 impl KeyType {
+    /// Creates a new `KeyType` from a given name.
+    ///
+    /// # Example
+    /// ```rust
+    /// # fn example() -> Result<()> {
+    /// let kt = sshkeys::KeyType::from_name("ssh-rsa")?;\
+    /// assert_eq!(kt.kind, sshkeys::KeyTypeKind::Rsa);
+    /// # Ok(());
+    /// # }
+    /// ```
     pub fn from_name(name: &str) -> Result<KeyType> {
         let kt = match name {
             "ssh-rsa" =>
