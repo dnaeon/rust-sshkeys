@@ -18,7 +18,7 @@ impl Error {
 
 /// A type to represent the different kinds of errors.
 #[derive(Debug)]
-pub enum ErrorKind {
+pub(crate) enum ErrorKind {
     Io(io::Error),
     Decode(base64::DecodeError),
     Utf8Error(string::FromUtf8Error),
