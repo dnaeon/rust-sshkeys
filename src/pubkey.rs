@@ -57,6 +57,52 @@ pub struct DsaPublicKey {
     pub y: Vec<u8>,
 }
 
+/// Represents the different kinds of supported curves.
+#[derive(Debug, PartialEq)]
+pub enum CurveKind {
+    /// Represents a NIST P-256 curve
+    Nistp256,
+
+    /// Represents a NIST P-384 curve
+    Nistp384,
+
+    /// Represents a NIST P-521 curve
+    Nistp521,
+}
+
+/// A type which represents a cryptographic curve.
+#[derive(Debug, PartialEq)]
+pub struct Curve {
+    /// The curve kind.
+    pub kind: CurveKind,
+
+    /// Curve identifier.
+    pub identifier: &'static str,
+}
+
+impl Curve {
+    /// Creates a new `Curve` from the given identifier.
+    ///
+    /// # Example
+    /// ```rust
+    /// # fn example() -> Result<()> {
+    /// let curve = Curve::from_identifier("nistp256")?;
+    /// assert_eq!(curve.kind, CurveKind::Nistp256);
+    /// # Ok(());
+    /// # }
+    /// ```
+    pub fn from_identifier(id: &str) -> Result<Curve> {
+        let curve = match id {
+            "nistp256" => Curve { kind: CurveKind::Nistp256, identifier: "nistp256" },
+            "nistp384" => Curve { kind: CurveKind::Nistp384, identifier: "nistp384" },
+            "nistp521" => Curve { kind: CurveKind::Nistp521, identifier: "nistp521" },
+            _ => return Err(Error::with_kind(ErrorKind::UnknownCurve(id.to_string()))),
+        };
+
+        Ok(curve)
+    }
+}
+
 /// ECDSA public key.
 /// The format of ECDSA public keys is described in RFC 5656, section 3.1.
 #[derive(Debug, PartialEq)]
