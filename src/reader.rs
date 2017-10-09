@@ -2,32 +2,42 @@ use super::error::{Error, ErrorKind, Result};
 
 use byteorder::{BigEndian, ByteOrder};
 
-// A `Reader` is used for reading and iterating over a
-// byte sequence representing an OpenSSH certificate key.
-// The data types used in an OpenSSH certificate key are
-// described in RFC4251 section 5.
+/// A `Reader` is used for reading from a byte sequence
+/// representing an encoded OpenSSH public key or certificate.
 pub struct Reader<'a> {
     inner: &'a [u8],
     offset: usize,
 }
 
 impl<'a> Reader<'a> {
-    // Creates a new `Reader` instance from the given slice.
+    /// Creates a new `Reader` instance from the given byte sequence.
+    ///
+    /// # Example
+    /// ```rust
+    /// let data = vec!(...);
+    /// let reader = sshkeys::Reader::new(&data);
+    /// ```
     pub fn new<T: ?Sized + AsRef<[u8]>>(inner: &T) -> Reader {
         Reader { inner: inner.as_ref(), offset: 0, }
     }
 
-    // Sets the `Reader` offset to a given position.
+    /// Sets the `Reader` current offset to a given position.
+    ///
+    /// # Example
+    /// ```rust
+    /// let reader = sshkeys::Reader::new(&data);
+    /// assert_eq!(reader.set_offset(0), Ok());
+    /// ```
     pub fn set_offset(&mut self, offset: usize) -> Result<()> {
         self.offset = offset;
 
         Ok(())
     }
 
-    // Reads a `string` value from the wrapped byte sequence and
-    // returns it as a `Vec<u8>`.
-    // A `string` is represented by it's length as `u32` value
-    // followed by the bytes to read.
+    /// Reads a `string` value from the wrapped byte sequence and
+    /// returns it as a `Vec<u8>`.
+    /// A `string` is represented by it's length as `u32` value
+    /// followed by the bytes to read.
     pub fn read_bytes(&mut self) -> Result<Vec<u8>> {
         if self.offset >= self.inner.len() {
             return Err(Error::with_kind(ErrorKind::UnexpectedEof));
@@ -51,8 +61,8 @@ impl<'a> Reader<'a> {
         Ok(result)
     }
 
-    // Reads an `mpint` value from the wrapped byte sequence.
-    // Drops the leading byte if it's value is zero according to the RFC 4251, section 5.
+    /// Reads an `mpint` value from the wrapped byte sequence.
+    /// Drops the leading byte if it's value is zero according to the RFC 4251, section 5.
     pub fn read_mpint(&mut self) -> Result<Vec<u8>> {
         let bytes = self.read_bytes()?;
 
@@ -63,10 +73,9 @@ impl<'a> Reader<'a> {
         Ok(bytes)
     }
 
-    // Reads a `string` value from the wrapped byte sequence and
-    // returns it as a `String`.
-    // The value that we read should be a valid UTF-8.
-    // If the value is not a valid UTF-8 consider using `read_string_unchecked` method.
+    /// Reads a `string` value from the wrapped byte sequence and
+    /// returns it as a `String`.
+    /// The value that we read should be a valid UTF-8.
     pub fn read_string(&mut self) -> Result<String> {
         let bytes = self.read_bytes()?;
         let result = String::from_utf8(bytes)?;
@@ -74,7 +83,7 @@ impl<'a> Reader<'a> {
         Ok(result)
     }
 
-    // Reads an `u32` value from the wrapped byte sequence and returns it.
+    /// Reads an `u32` value from the wrapped byte sequence and returns it.
     pub fn read_u32(&mut self) -> Result<u32> {
         if self.offset >= self.inner.len() {
             return Err(Error::with_kind(ErrorKind::UnexpectedEof));
@@ -91,7 +100,7 @@ impl<'a> Reader<'a> {
         Ok(value)
     }
 
-    // Reads an `u64` value from the wrapped byte sequence and returns it.
+    /// Reads an `u64` value from the wrapped byte sequence and returns it.
     pub fn read_u64(&mut self) -> Result<u64> {
         if self.offset >= self.inner.len() {
             return Err(Error::with_kind(ErrorKind::UnexpectedEof));
