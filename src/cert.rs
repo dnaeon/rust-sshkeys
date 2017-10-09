@@ -10,24 +10,25 @@ use super::error::{Error, ErrorKind, Result};
 
 use base64;
 
-/// Represents the different certificate types.
+/// Represents the different types a certificate can be.
 #[derive(Debug, PartialEq)]
 pub enum CertType {
-    /// Represents a user certificate
+    /// Represents a user certificate.
     User,
 
-    /// Represents a host certificate
+    /// Represents a host certificate.
     Host
 }
 
 /// A type which represents an OpenSSH certificate key.
-/// https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.certkeys
+/// See [PROTOCOL.certkeys] for more details about OpenSSH certificates.
+/// [PROTOCOL.certkeys]: https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.certkeys
 #[derive(Debug)]
 pub struct Certificate {
     /// The type of certificate.
     pub key_type: KeyType,
 
-    /// Key nonce.
+    /// Cryptographic nonce.
     pub nonce: Vec<u8>,
 
     /// Public key part of the certificate.
@@ -59,7 +60,7 @@ pub struct Certificate {
     /// enable features that grant access.
     pub extensions: HashMap<String, String>,
 
-    /// Reserved field is currently unused and is ignored in this version of the protocol.
+    /// The `reserved` field is currently unused and is ignored in this version of the protocol.
     pub reserved: Vec<u8>,
 
     /// Signature key contains the CA key used to sign the certificate.
@@ -68,20 +69,20 @@ pub struct Certificate {
     /// Signature of the certificate.
     pub signature: Vec<u8>,
 
-    /// Certificate comment, if any.
+    /// Associated comment, if any.
     pub comment: Option<String>,
 }
 
 impl Certificate {
-    /// Reads an OpenSSH certificate key from a given path.
+    /// Reads an OpenSSH certificate from a given path.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// # use sshkeys;
     /// # fn example() -> sshkeys::Result<()> {
-    /// let cert = sshkeys::Certificate::from_path("/path/to/my-public-key.pub")?;
-    /// # Ok(());
+    /// let cert = sshkeys::Certificate::from_path("/path/to/id_ed25519-cert.pub")?;
+    /// # Ok(())
     /// # }
     /// ```
     pub fn from_path<P: AsRef<Path>>(path: P) -> Result<Certificate> {
@@ -93,15 +94,15 @@ impl Certificate {
         Certificate::from_string(&contents)
     }
 
-    /// Reads an OpenSSH certificate key from a given string.
+    /// Reads an OpenSSH certificate from a given string.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// # use sshkeys;
     /// # fn example() -> sshkeys::Result<()> {
     /// let cert = sshkeys::Certificate::from_string("ssh-rsa AAAAB3NzaC1yc2EAAAA...")?;
-    /// # Ok(());
+    /// # Ok(())
     /// # }
     /// ```
     pub fn from_string(s: &str) -> Result<Certificate> {
