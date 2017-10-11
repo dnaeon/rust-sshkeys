@@ -23,8 +23,11 @@ impl Writer {
     ///
     /// # Example
     /// ```rust
+    /// # use sshkeys;
     /// let mut writer = sshkeys::Writer::new();
-    /// writer.write_bytes(&[1, 2, 3]);
+    /// writer.write_bytes(&[0, 0, 0, 42]);
+    /// let bytes = writer.into_bytes();
+    /// assert_eq!(bytes, vec![0, 0, 0, 4, 0, 0, 0, 42]);
     /// ```
     pub fn write_bytes(&mut self, val: &[u8]) {
         let size = val.len() as u32;
@@ -35,14 +38,32 @@ impl Writer {
     }
 
     /// Writes a `string` value to the underlying byte sequence.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use sshkeys;
+    /// let mut writer = sshkeys::Writer::new();
+    /// writer.write_string("a test string");
+    /// let bytes = writer.into_bytes();
+    /// assert_eq!(bytes, [0, 0, 0, 13, 97, 32, 116, 101, 115, 116, 32, 115, 116, 114, 105, 110, 103]);
+    /// ```
     pub fn write_string(&mut self, val: &str) {
-        self.write_bytes(val.as_bytes())
+        self.write_bytes(val.as_bytes());
     }
 
     /// Writes an `mpint` value to the underlying byte sequence.
     /// If the MSB bit of the first byte is set then the number is
     /// negative, otherwise it is positive.
     /// Positive numbers must be preceeded by a leading zero byte according to RFC 4251, section 5.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use sshkeys;
+    /// let mut writer = sshkeys::Writer::new();
+    /// writer.write_mpint(&[1, 0, 1]);
+    /// let bytes = writer.into_bytes();
+    /// assert_eq!(bytes, [0, 0, 0, 3, 1, 0, 1]);
+    /// ```
     pub fn write_mpint(&mut self, val: &[u8]) {
         let mut bytes = val.to_vec();
 
@@ -52,7 +73,7 @@ impl Writer {
             bytes.insert(0, 0);
         }
 
-        self.write_bytes(&bytes)
+        self.write_bytes(&bytes);
     }
 
     /// Converts the `Writer` into a byte sequence.

@@ -15,8 +15,14 @@ impl<'a> Reader<'a> {
     ///
     /// # Example
     /// ```rust
-    /// let data = vec!(...);
-    /// let reader = sshkeys::Reader::new(&data);
+    /// # use sshkeys;
+    /// # fn example() -> sshkeys::Result<()> {
+    /// let data = vec![0, 0, 0, 42];
+    /// let mut reader = sshkeys::Reader::new(&data);
+    /// let num = reader.read_u32()?;
+    /// assert_eq!(num, 42);
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn new<T: ?Sized + AsRef<[u8]>>(inner: &T) -> Reader {
         Reader { inner: inner.as_ref(), offset: 0, }
@@ -26,8 +32,17 @@ impl<'a> Reader<'a> {
     ///
     /// # Example
     /// ```rust
-    /// let reader = sshkeys::Reader::new(&data);
-    /// assert_eq!(reader.set_offset(0), Ok());
+    /// # use sshkeys;
+    /// # fn example() -> sshkeys::Result<()> {
+    /// let data = vec![0, 0, 0, 42];
+    /// let mut reader = sshkeys::Reader::new(&data);
+    /// let num = reader.read_u32()?;
+    /// assert_eq!(num, 42);
+    /// reader.set_offset(0);
+    /// let num_42_again = reader.read_u32()?;
+    /// assert_eq!(num_42_again, 42);
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn set_offset(&mut self, offset: usize) -> Result<()> {
         self.offset = offset;

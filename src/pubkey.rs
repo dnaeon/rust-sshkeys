@@ -84,10 +84,11 @@ impl Curve {
     ///
     /// # Example
     /// ```rust
-    /// # fn example() -> Result<()> {
-    /// let curve = Curve::from_identifier("nistp256")?;
-    /// assert_eq!(curve.kind, CurveKind::Nistp256);
-    /// # Ok(());
+    /// # use sshkeys;
+    /// # fn example() -> sshkeys::Result<()> {
+    /// let curve = sshkeys::Curve::from_identifier("nistp256")?;
+    /// assert_eq!(curve.kind, sshkeys::CurveKind::Nistp256);
+    /// # Ok(())
     /// # }
     /// ```
     pub fn from_identifier(id: &str) -> Result<Curve> {
@@ -124,7 +125,7 @@ pub struct Ed25519PublicKey {
 /// A type which represents an OpenSSH public key.
 #[derive(Debug)]
 pub struct PublicKey {
-    /// Type of public key.
+    /// Key type.
     pub key_type: KeyType,
 
     /// The kind of public key.
@@ -219,7 +220,7 @@ impl PublicKey {
     /// ```rust
     /// # fn example() -> sshkeys::Result<()> {
     /// let key = sshkeys::PublicKey::from_path("/path/to/public-key.pub")?;
-    /// # Ok(());
+    /// # Ok(())
     /// # }
     /// ```
     pub fn from_path<P: AsRef<Path>>(path: P) -> Result<PublicKey> {
