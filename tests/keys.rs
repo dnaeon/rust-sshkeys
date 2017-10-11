@@ -605,11 +605,11 @@ fn test_ed25519_host_cert() {
     assert_eq!(cert.valid_before, 1538385716);
 
     // No critical options are defined for host certificates
-    let mut co = HashMap::new();
+    let co = HashMap::new();
     assert_eq!(cert.critical_options, co);
 
     // No extensions are defined for host certificates
-    let mut extensions = HashMap::new();
+    let extensions = HashMap::new();
     assert_eq!(cert.extensions, extensions);
 
     // The `reserved` field is empty in the current implementation of OpenSSH certificates
