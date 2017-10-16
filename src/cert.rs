@@ -177,8 +177,6 @@ impl Certificate {
 
         Ok(cert)
     }
-
-    // TODO: Add method for validating a certificate, e.g. whether or not it has already expired
 }
 
 // Reads `option` values from a byte sequence.
@@ -216,8 +214,6 @@ fn read_options(buf: &[u8]) -> Result<HashMap<String, String>> {
             "".to_string()
         };
 
-        // TODO: Check if the options are in lexical order
-        // TODO: Check if options are specified only once
         options.insert(name, value);
     }
 
