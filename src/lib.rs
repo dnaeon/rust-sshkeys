@@ -23,27 +23,12 @@
 //!
 //! # Examples
 //!
-//! ```rust
-//! # use sshkeys;
-//! # fn run() -> sshkeys::Result<()> {
-//! let key = sshkeys::PublicKey::from_path("/path/to/my-public-key.pub")?;
-//! println!("Key bits: {}", key.bits());
-//! # Ok(())
-//! # }
-//! ```
-//!
-//! TODO: Add more examples
+//! In order to view examples of this crate in use, please refer to the
+//! `examples` directory.
 
 extern crate base64;
 extern crate byteorder;
 extern crate sha2;
-
-pub use self::cert::{CertType, Certificate};
-pub use self::error::{Error, Result};
-pub use self::keytype::{KeyType, KeyTypeKind};
-pub use self::pubkey::{PublicKey, PublicKeyKind, RsaPublicKey, DsaPublicKey, EcdsaPublicKey, Ed25519PublicKey, Fingerprint, FingerprintKind, Curve, CurveKind};
-pub use self::reader::Reader;
-pub use self::writer::Writer;
 
 mod cert;
 mod error;
@@ -51,3 +36,10 @@ mod keytype;
 mod pubkey;
 mod reader;
 mod writer;
+
+pub use self::cert::{CertType, Certificate};
+pub use self::error::{Error, Result};
+pub use self::keytype::{KeyType, KeyTypeKind};
+pub use self::pubkey::{PublicKey, PublicKeyKind, RsaPublicKey, DsaPublicKey, EcdsaPublicKey, Ed25519PublicKey, Fingerprint, FingerprintKind, Curve, CurveKind};
+pub use self::reader::Reader;
+pub use self::writer::Writer;
