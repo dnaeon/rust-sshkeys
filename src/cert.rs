@@ -17,15 +17,15 @@ pub enum CertType {
     User,
 
     /// Represents a host certificate.
-    Host
+    Host,
 }
 
 /// A type which represents an OpenSSH certificate key.
-/// See [PROTOCOL.certkeys] for more details about OpenSSH certificates.
-/// [PROTOCOL.certkeys]: https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.certkeys
+/// Please refer to [PROTOCOL.certkeys] for more details about OpenSSH certificates.
+/// [PROTOCOL.certkeys]: https://cvsweb.openbsd.org/cgi-bin/cvsweb/src/usr.bin/ssh/PROTOCOL.certkeys?annotate=HEAD
 #[derive(Debug)]
 pub struct Certificate {
-    /// The type of certificate.
+    /// Type of key.
     pub key_type: KeyType,
 
     /// Cryptographic nonce.
@@ -63,7 +63,7 @@ pub struct Certificate {
     /// The `reserved` field is currently unused and is ignored in this version of the protocol.
     pub reserved: Vec<u8>,
 
-    /// Signature key contains the CA key used to sign the certificate.
+    /// Signature key contains the CA public key used to sign the certificate.
     pub signature_key: PublicKey,
 
     /// Signature of the certificate.
@@ -86,10 +86,8 @@ impl Certificate {
     /// # }
     /// ```
     pub fn from_path<P: AsRef<Path>>(path: P) -> Result<Certificate> {
-        let mut file = File::open(path)?;
-
         let mut contents = String::new();
-        file.read_to_string(&mut contents)?;
+        File::open(path)?.read_to_string(&mut contents)?;
 
         Certificate::from_string(&contents)
     }
@@ -108,16 +106,18 @@ impl Certificate {
     pub fn from_string(s: &str) -> Result<Certificate> {
         let mut iter = s.split_whitespace();
 
-        let kt_name = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
-        let kt = KeyType::from_name(&kt_name)?;
+        let kt_name = iter.next()
+            .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
+        let kt = KeyType::from_name(&kt_name)?;
         if !kt.is_cert {
             return Err(Error::with_kind(ErrorKind::NotCertificate));
         }
 
-        let data = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
-        let comment = iter.next().map(|v| String::from(v));
+        let data = iter.next()
+            .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
+        let comment = iter.next().map(|v| String::from(v));
         let decoded = base64::decode(&data)?;
         let mut reader = Reader::new(&decoded);
 
@@ -138,23 +138,13 @@ impl Certificate {
         };
 
         let key_id = reader.read_string()?;
-
-        let buf = reader.read_bytes()?;
-        let principals = read_principals(&buf)?;
-
+        let principals = reader.read_bytes().and_then(|v| read_principals(&v))?;
         let valid_after = reader.read_u64()?;
         let valid_before = reader.read_u64()?;
-
-        let buf = reader.read_bytes()?;
-        let critical_options = read_options(&buf)?;
-
-        let buf = reader.read_bytes()?;
-        let extensions = read_options(&buf)?;
+        let critical_options = reader.read_bytes().and_then(|v| read_options(&v))?;
+        let extensions = reader.read_bytes().and_then(|v| read_options(&v))?;
         let reserved = reader.read_bytes()?;
-
-        let buf = reader.read_bytes()?;
-
-        let signature_key = PublicKey::from_bytes(&buf)?;
+        let signature_key = reader.read_bytes().and_then(|v| PublicKey::from_bytes(&v))?;
         let signature = reader.read_bytes()?;
 
         let cert = Certificate {
@@ -200,12 +190,10 @@ fn read_options(buf: &[u8]) -> Result<HashMap<String, String>> {
     // read all options from the provided byte slice.
     loop {
         let name = match reader.read_string() {
-            Ok(v)  => v,
-            Err(e) => {
-                match e.kind {
-                    ErrorKind::UnexpectedEof => break,
-                    _                   => return Err(e),
-                }
+            Ok(v) => v,
+            Err(e) => match e.kind {
+                ErrorKind::UnexpectedEof => break,
+                _ => return Err(e),
             },
         };
 
@@ -237,12 +225,10 @@ fn read_principals(buf: &[u8]) -> Result<Vec<String>> {
 
     loop {
         let principal = match reader.read_string() {
-            Ok(v)  => v,
-            Err(e) => {
-                match e.kind {
-                    ErrorKind::UnexpectedEof => break,
-                    _                        => return Err(e),
-                }
+            Ok(v) => v,
+            Err(e) => match e.kind {
+                ErrorKind::UnexpectedEof => break,
+                _ => return Err(e),
             },
         };
 
