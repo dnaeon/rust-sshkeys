@@ -10,26 +10,26 @@ use super::error::{Error, ErrorKind, Result};
 
 use base64;
 
-use sha2::{Sha256, Sha384, Sha512, Digest};
+use sha2::{Digest, Sha256, Sha384, Sha512};
 
 /// A type which represents the different kinds a public key can be.
 #[derive(Debug, PartialEq)]
 pub enum PublicKeyKind {
-    /// Represents a RSA public key.
+    /// Represents an RSA public key.
     Rsa(RsaPublicKey),
 
     /// Represents a DSA public key.
     Dsa(DsaPublicKey),
 
-    /// Represents a ECDSA public key.
+    /// Represents an ECDSA public key.
     Ecdsa(EcdsaPublicKey),
 
-    /// Represents a ED25519 public key.
+    /// Represents an ED25519 public key.
     Ed25519(Ed25519PublicKey),
 }
 
 /// RSA public key.
-/// The format of RSA public key is described in RFC 4253, section 6.6
+/// The format of RSA public keys is described in RFC 4253, section 6.6
 #[derive(Debug, PartialEq)]
 pub struct RsaPublicKey {
     /// Exponent of key.
@@ -40,7 +40,7 @@ pub struct RsaPublicKey {
 }
 
 /// DSA public key.
-/// The format of DSA public key is described in RFC 4253, section 6.6
+/// The format of DSA public keys is described in RFC 4253, section 6.6
 #[derive(Debug, PartialEq)]
 pub struct DsaPublicKey {
     /// Parameter `p`.
@@ -59,13 +59,13 @@ pub struct DsaPublicKey {
 /// Represents the different kinds of supported curves.
 #[derive(Debug, PartialEq)]
 pub enum CurveKind {
-    /// Represents a NIST P-256 curve
+    /// Represents a NIST P-256 curve.
     Nistp256,
 
-    /// Represents a NIST P-384 curve
+    /// Represents a NIST P-384 curve.
     Nistp384,
 
-    /// Represents a NIST P-521 curve
+    /// Represents a NIST P-521 curve.
     Nistp521,
 }
 
@@ -85,17 +85,23 @@ impl Curve {
     /// # Example
     /// ```rust
     /// # use sshkeys;
-    /// # fn example() -> sshkeys::Result<()> {
-    /// let curve = sshkeys::Curve::from_identifier("nistp256")?;
+    /// let curve = sshkeys::Curve::from_identifier("nistp256").unwrap();
     /// assert_eq!(curve.kind, sshkeys::CurveKind::Nistp256);
-    /// # Ok(())
-    /// # }
     /// ```
     pub fn from_identifier(id: &str) -> Result<Curve> {
         let curve = match id {
-            "nistp256" => Curve { kind: CurveKind::Nistp256, identifier: "nistp256" },
-            "nistp384" => Curve { kind: CurveKind::Nistp384, identifier: "nistp384" },
-            "nistp521" => Curve { kind: CurveKind::Nistp521, identifier: "nistp521" },
+            "nistp256" => Curve {
+                kind: CurveKind::Nistp256,
+                identifier: "nistp256",
+            },
+            "nistp384" => Curve {
+                kind: CurveKind::Nistp384,
+                identifier: "nistp384",
+            },
+            "nistp521" => Curve {
+                kind: CurveKind::Nistp521,
+                identifier: "nistp521",
+            },
             _ => return Err(Error::with_kind(ErrorKind::UnknownCurve(id.to_string()))),
         };
 
@@ -139,10 +145,17 @@ impl fmt::Display for PublicKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let comment = match self.comment {
             Some(ref c) => c,
-            None        => "",
+            None => "",
         };
 
-        write!(f, "{} {} {} ({})", self.bits(), self.fingerprint(), comment, self.key_type.short_name)
+        write!(
+            f,
+            "{} {} {} ({})",
+            self.bits(),
+            self.fingerprint(),
+            comment,
+            self.key_type.short_name
+        )
     }
 }
 
@@ -188,8 +201,19 @@ impl fmt::Display for Fingerprint {
 }
 
 impl Fingerprint {
-    /// Computes the fingerprint of a public key using the given fingerprint representation.
-    pub fn compute<T: AsRef<[u8]>>(kind: FingerprintKind, data: &T) -> Fingerprint {
+    /// Computes the fingerprint of a byte sequence using a given fingerprint representation.
+    ///
+    /// This method computes a fingerprint the way OpenSSH does it and is generally being
+    /// used to compute the fingerprint of an already encoded OpenSSH public key.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use sshkeys;
+    /// let fp = sshkeys::Fingerprint::compute(sshkeys::FingerprintKind::Sha256, "some data".as_bytes());
+    /// assert_eq!(fp.kind, sshkeys::FingerprintKind::Sha256);
+    /// assert_eq!(fp.hash, "EweZDmulyhRes16ZGCqb7EZTG8VN32VqYCx4D6AkDe4");
+    /// ```
+    pub fn compute<T: ?Sized + AsRef<[u8]>>(kind: FingerprintKind, data: &T) -> Fingerprint {
         let digest = match kind {
             FingerprintKind::Sha256 => Sha256::digest(&data.as_ref()).to_vec(),
             FingerprintKind::Sha384 => Sha384::digest(&data.as_ref()).to_vec(),
@@ -201,7 +225,7 @@ impl Fingerprint {
         // Trim padding characters from end
         let hash = match encoded.find('=') {
             Some(offset) => encoded.drain(..offset).collect(),
-            None         => encoded,
+            None => encoded,
         };
 
         let fp = Fingerprint {
@@ -217,16 +241,16 @@ impl PublicKey {
     /// Reads an OpenSSH public key from a given path.
     ///
     /// # Examples
+    ///
     /// ```rust
     /// # fn example() -> sshkeys::Result<()> {
-    /// let key = sshkeys::PublicKey::from_path("/path/to/public-key.pub")?;
+    /// let key = sshkeys::PublicKey::from_path("/path/to/id_ed25519.pub")?;
     /// # Ok(())
     /// # }
     /// ```
     pub fn from_path<P: AsRef<Path>>(path: P) -> Result<PublicKey> {
-        let mut file = File::open(path)?;
         let mut contents = String::new();
-        file.read_to_string(&mut contents)?;
+        File::open(path)?.read_to_string(&mut contents)?;
 
         PublicKey::from_string(&contents)
     }
@@ -234,23 +258,33 @@ impl PublicKey {
     /// Reads an OpenSSH public key from a given string.
     ///
     /// # Examples
-    /// TODO: Add example
+    ///
+    /// ```rust
+    /// # use sshkeys;
+    /// let key = sshkeys::PublicKey::from_string("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHkbe7gwx7s0dlApEEzpUyOAPrzPLy4czEZw/sh8m8rd me@home").unwrap();
+    /// let fp = key.fingerprint();
+    /// assert_eq!(fp.hash, "ciQkdxjFUhk2E2vRkWJD9kB8pi+EneOkaCJJHNWzPC4");
+    /// ```
     pub fn from_string(contents: &str) -> Result<PublicKey> {
         let mut iter = contents.split_whitespace();
 
-        let kt_name = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
-        let data = iter.next().ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
+        let kt_name = iter.next()
+            .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
+
+        let data = iter.next()
+            .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
+
         let comment = iter.next().map(|v| String::from(v));
 
-        // TODO: Check if we can use `map` here instead.
         let kt = KeyType::from_name(&kt_name)?;
+
         let decoded = base64::decode(&data)?;
         let mut reader = Reader::new(&decoded);
 
         // Validate key type before reading rest of the data
         let kt_from_reader = reader.read_string()?;
         if kt_name != kt_from_reader {
-            return Err(Error::with_kind(ErrorKind::KeyTypeMismatch))
+            return Err(Error::with_kind(ErrorKind::KeyTypeMismatch));
         }
 
         // Construct a new `PublicKey` value and preserve the `comment` value.
@@ -265,7 +299,25 @@ impl PublicKey {
     }
 
     /// Reads a public key from a given byte sequence.
+    ///
     /// The byte sequence is expected to be the base64 decoded body of the public key.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use sshkeys;
+    /// let data = vec![0, 0, 0, 11, 115, 115, 104, 45,
+    ///                 101, 100, 50, 53, 53, 49, 57,
+    ///                 0, 0, 0, 32, 121, 27, 123, 184,
+    ///                 48, 199, 187, 52, 118, 80, 41, 16,
+    ///                 76, 233, 83, 35, 128, 62, 188,
+    ///                 207, 47, 46, 28, 204, 70, 112,
+    ///                 254, 200, 124, 155, 202, 221];
+    ///
+    /// let key = sshkeys::PublicKey::from_bytes(&data).unwrap();
+    /// let fp = key.fingerprint();
+    /// assert_eq!(fp.hash, "ciQkdxjFUhk2E2vRkWJD9kB8pi+EneOkaCJJHNWzPC4");
+    /// ```
     pub fn from_bytes<T: ?Sized + AsRef<[u8]>>(data: &T) -> Result<PublicKey> {
         let mut reader = Reader::new(&data);
         let kt_name = reader.read_string()?;
@@ -280,17 +332,15 @@ impl PublicKey {
         let kt = KeyType::from_name(&kt_name)?;
 
         let kind = match kt.kind {
-            KeyTypeKind::Rsa     |
-            KeyTypeKind::RsaCert => {
+            KeyTypeKind::Rsa | KeyTypeKind::RsaCert => {
                 let k = RsaPublicKey {
                     e: reader.read_mpint()?,
                     n: reader.read_mpint()?,
                 };
 
                 PublicKeyKind::Rsa(k)
-            },
-            KeyTypeKind::Dsa     |
-            KeyTypeKind::DsaCert => {
+            }
+            KeyTypeKind::Dsa | KeyTypeKind::DsaCert => {
                 let k = DsaPublicKey {
                     p: reader.read_mpint()?,
                     q: reader.read_mpint()?,
@@ -299,9 +349,8 @@ impl PublicKey {
                 };
 
                 PublicKeyKind::Dsa(k)
-            },
-            KeyTypeKind::Ecdsa |
-            KeyTypeKind::EcdsaCert => {
+            }
+            KeyTypeKind::Ecdsa | KeyTypeKind::EcdsaCert => {
                 let identifier = reader.read_string()?;
                 let curve = Curve::from_identifier(&identifier)?;
                 let key = reader.read_bytes()?;
@@ -311,15 +360,14 @@ impl PublicKey {
                 };
 
                 PublicKeyKind::Ecdsa(k)
-            },
-            KeyTypeKind::Ed25519 |
-            KeyTypeKind::Ed25519Cert => {
+            }
+            KeyTypeKind::Ed25519 | KeyTypeKind::Ed25519Cert => {
                 let k = Ed25519PublicKey {
                     key: reader.read_bytes()?,
                 };
 
                 PublicKeyKind::Ed25519(k)
-            },
+            }
         };
 
         let key = PublicKey {
@@ -332,24 +380,25 @@ impl PublicKey {
     }
 
     /// Returns the number of bits of the public key.
-    /// TODO: Add examples
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use sshkeys;
+    /// let key = sshkeys::PublicKey::from_string("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHkbe7gwx7s0dlApEEzpUyOAPrzPLy4czEZw/sh8m8rd me@home").unwrap();
+    /// assert_eq!(key.bits(), 256);
+    /// ```
     pub fn bits(&self) -> usize {
         match self.kind {
             // For RSA public key the size of the key is the number of bits of the modulus
-            PublicKeyKind::Rsa(ref k) => {
-                k.n.len() * 8
-            },
+            PublicKeyKind::Rsa(ref k) => k.n.len() * 8,
             // For DSA public keys the size of the key is the number of bits of the `p` parameter
-            PublicKeyKind::Dsa(ref k) => {
-                k.p.len() * 8
-            },
+            PublicKeyKind::Dsa(ref k) => k.p.len() * 8,
             // ECDSA key size depends on the curve
-            PublicKeyKind::Ecdsa(ref k) => {
-                match k.curve.kind {
-                    CurveKind::Nistp256 => 256,
-                    CurveKind::Nistp384 => 384,
-                    CurveKind::Nistp521 => 521,
-                }
+            PublicKeyKind::Ecdsa(ref k) => match k.curve.kind {
+                CurveKind::Nistp256 => 256,
+                CurveKind::Nistp384 => 384,
+                CurveKind::Nistp521 => 521,
             },
             // ED25519 key size is 256 bits
             // https://tools.ietf.org/html/draft-josefsson-eddsa-ed25519-03#section-5.5
@@ -358,7 +407,13 @@ impl PublicKey {
     }
 
     /// Encodes the public key in an OpenSSH compatible format.
-    /// TODO: Add examples
+    ///
+    /// # Example
+    /// ```rust
+    /// # use sshkeys;
+    /// let key = sshkeys::PublicKey::from_string("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHkbe7gwx7s0dlApEEzpUyOAPrzPLy4czEZw/sh8m8rd me@home").unwrap();
+    /// assert_eq!(key.encode(), vec![0, 0, 0, 11, 115, 115, 104, 45, 101, 100, 50, 53, 53, 49, 57, 0, 0, 0, 32, 121, 27, 123, 184, 48, 199, 187, 52, 118, 80, 41, 16, 76, 233, 83, 35, 128, 62, 188, 207, 47, 46, 28, 204, 70, 112, 254, 200, 124, 155, 202, 221]);
+    /// ```
     pub fn encode(&self) -> Vec<u8> {
         let mut w = Writer::new();
 
@@ -367,20 +422,20 @@ impl PublicKey {
             PublicKeyKind::Rsa(ref k) => {
                 w.write_mpint(&k.e);
                 w.write_mpint(&k.n);
-            },
+            }
             PublicKeyKind::Dsa(ref k) => {
                 w.write_mpint(&k.p);
                 w.write_mpint(&k.q);
                 w.write_mpint(&k.g);
                 w.write_mpint(&k.y);
-            },
+            }
             PublicKeyKind::Ecdsa(ref k) => {
                 w.write_string(&k.curve.identifier);
                 w.write_bytes(&k.key);
-            },
+            }
             PublicKeyKind::Ed25519(ref k) => {
                 w.write_bytes(&k.key);
-            },
+            }
         }
 
         w.into_bytes()
@@ -388,12 +443,36 @@ impl PublicKey {
 
     /// Computes the fingerprint of the public key using the
     /// default OpenSSH fingerprint representation with SHA256.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use sshkeys;
+    /// # fn example() -> sshkeys::Result<()> {
+    /// let key = sshkeys::PublicKey::from_path("/path/to/id_ed25519.pub")?;
+    /// let fp = key.fingerprint();
+    /// println!("{}", fp.hash);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn fingerprint(&self) -> Fingerprint {
         self.fingerprint_with(FingerprintKind::Sha256)
     }
 
     /// Computes the fingerprint of the public key using a given
     /// fingerprint representation.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use sshkeys;
+    /// # fn example() -> sshkeys::Result<()> {
+    /// let key = sshkeys::PublicKey::from_path("/path/to/id_ed25519.pub").unwrap();
+    /// let sha512fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha512);
+    /// println!("{}", sha512fp.hash);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn fingerprint_with(&self, kind: FingerprintKind) -> Fingerprint {
         Fingerprint::compute(kind, &self.encode())
     }
