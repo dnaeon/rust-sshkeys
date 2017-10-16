@@ -1,4 +1,4 @@
-use std::io::Read;
+use std::io::{self, Read};
 use std::fmt;
 use std::fs::File;
 use std::path::Path;
