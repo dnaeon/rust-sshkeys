@@ -40,6 +40,7 @@ mod writer;
 pub use self::cert::{CertType, Certificate};
 pub use self::error::{Error, Result};
 pub use self::keytype::{KeyType, KeyTypeKind};
-pub use self::pubkey::{PublicKey, PublicKeyKind, RsaPublicKey, DsaPublicKey, EcdsaPublicKey, Ed25519PublicKey, Fingerprint, FingerprintKind, Curve, CurveKind};
+pub use self::pubkey::{Curve, CurveKind, DsaPublicKey, EcdsaPublicKey, Ed25519PublicKey,
+                       Fingerprint, FingerprintKind, PublicKey, PublicKeyKind, RsaPublicKey};
 pub use self::reader::Reader;
 pub use self::writer::Writer;
