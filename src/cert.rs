@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
 use std::io::Read;
+use std::fmt;
 
 use super::keytype::KeyType;
 use super::pubkey::PublicKey;
@@ -18,6 +19,15 @@ pub enum CertType {
 
     /// Represents a host certificate.
     Host,
+}
+
+impl fmt::Display for CertType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            CertType::User => write!(f, "user certificate"),
+            CertType::Host => write!(f, "host certificate"),
+        }
+    }
 }
 
 /// A type which represents an OpenSSH certificate key.
