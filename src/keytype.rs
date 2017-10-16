@@ -55,11 +55,8 @@ impl KeyType {
     /// # Example
     /// ```rust
     /// # use sshkeys;
-    /// # fn example() -> sshkeys::Result<()> {
-    /// let kt = sshkeys::KeyType::from_name("ssh-rsa")?;
+    /// let kt = sshkeys::KeyType::from_name("ssh-rsa").unwrap();
     /// assert_eq!(kt.kind, sshkeys::KeyTypeKind::Rsa);
-    /// # Ok(())
-    /// # }
     /// ```
     pub fn from_name(name: &str) -> Result<KeyType> {
         let kt = match name {
