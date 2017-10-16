@@ -476,4 +476,26 @@ impl PublicKey {
     pub fn fingerprint_with(&self, kind: FingerprintKind) -> Fingerprint {
         Fingerprint::compute(kind, &self.encode())
     }
+
+    /// Writes the public key to a given writer.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use sshkeys;
+    /// use std::fs::File;
+    /// # fn example() -> sshkeys::Result<()> {
+    /// let key = sshkeys::PublicKey::from_string("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA...")?;
+    /// let mut file = File::create("/path/to/id_ed25519.pub")?;
+    /// key.write(&mut file).unwrap();
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn write<W: io::Write>(&self, w: &mut W) -> io::Result<()> {
+        let encoded = self.encode();
+        let data = base64::encode(&encoded);
+        match self.comment {
+            Some(ref c) => w.write_fmt(format_args!("{} {} {}\n", self.key_type.name, data, c)),
+            None => w.write_fmt(format_args!("{} {}\n", self.key_type.name, data)),
+        }
+    }
 }
