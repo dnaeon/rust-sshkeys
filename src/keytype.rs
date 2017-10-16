@@ -28,8 +28,6 @@ pub enum KeyTypeKind {
     EcdsaCert,
 }
 
-// TODO: Implement fmt::Display
-
 /// `KeyType` represents the type of an OpenSSH key.
 #[derive(Debug)]
 pub struct KeyType {

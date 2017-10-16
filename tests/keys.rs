@@ -184,8 +184,6 @@ fn test_rsa_user_cert() {
     );
 
     assert_eq!(cert.comment, Some("me@home".to_string()));
-
-    // TODO: Validate the `signature` field
 }
 
 #[test]
@@ -324,8 +322,6 @@ fn test_dsa_user_cert() {
     );
 
     assert_eq!(cert.comment, Some("me@home".to_string()));
-
-    // TODO: Validate the `signature` field
 }
 
 #[test]
@@ -538,8 +534,6 @@ fn test_ecdsa_user_cert() {
     );
 
     assert_eq!(cert.comment, Some("me@home".to_string()));
-
-    // TODO: Validate the `signature` field
 }
 
 #[test]
@@ -670,8 +664,6 @@ pub fn test_ed25519_user_cert() {
     );
 
     assert_eq!(cert.comment, Some("me@home".to_string()));
-
-    // TODO: Validate the `signature` field
 }
 
 #[test]
@@ -761,6 +753,4 @@ fn test_ed25519_host_cert() {
     );
 
     assert_eq!(cert.comment, Some("me@home".to_string()));
-
-    // TODO: Validate the `signature` field
 }
