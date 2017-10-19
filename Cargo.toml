@@ -6,7 +6,7 @@ description = "Rust libraray for parsing OpenSSH certificates and public keys"
 documentation = "https://docs.rs/sshkeys"
 repository = "https://github.com/dnaeon/rust-sshkeys"
 readme = "README.md"
-keywords = ["ssh", "openssh", "parser", "public key", "certificate"]
+keywords = ["ssh", "openssh", "parser", "key", "certificate"]
 categories = ["cryptography", "parser-implementations", "encoding"]
 license-file = "LICENSE"
 
