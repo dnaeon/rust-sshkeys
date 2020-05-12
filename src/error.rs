@@ -59,26 +59,11 @@ impl From<string::FromUtf8Error> for Error {
 }
 
 impl StdError for Error {
-    fn description(&self) -> &str {
+    fn source(&self) -> Option<&(dyn StdError + 'static)> {
         match self.kind {
-            ErrorKind::Io(ref e) => e.description(),
-            ErrorKind::Decode(ref e) => e.description(),
-            ErrorKind::Utf8Error(ref e) => e.description(),
-            ErrorKind::InvalidCertType(_) => "Invalid certificate type",
-            ErrorKind::InvalidFormat => "Invalid format",
-            ErrorKind::UnexpectedEof => "Unexpected EOF reached while reading data",
-            ErrorKind::UnknownKeyType(_) => "Unknown key type",
-            ErrorKind::NotCertificate => "Not a certificate",
-            ErrorKind::KeyTypeMismatch => "Key type mismatch",
-            ErrorKind::UnknownCurve(_) => "Unknown curve",
-        }
-    }
-
-    fn cause(&self) -> Option<&StdError> {
-        match self.kind {
-            ErrorKind::Io(ref e) => e.cause(),
-            ErrorKind::Decode(ref e) => e.cause(),
-            ErrorKind::Utf8Error(ref e) => e.cause(),
+            ErrorKind::Io(ref e) => e.source(),
+            ErrorKind::Decode(ref e) => e.source(),
+            ErrorKind::Utf8Error(ref e) => e.source(),
             ErrorKind::InvalidCertType(_) |
             ErrorKind::InvalidFormat |
             ErrorKind::UnexpectedEof |

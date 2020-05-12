@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::error::Error;
 
 extern crate sshkeys;
 
@@ -80,7 +79,7 @@ fn test_rsa_pubkey_2048() {
 fn test_rsa_pubkey_2048_invalid_format() {
     match sshkeys::PublicKey::from_path("tests/test-keys/id_rsa_2048_invalid_format.pub") {
         Ok(v) => panic!("Expected invalid format, got {:?}", v),
-        Err(e) => panic!("{}", e.description()),
+        Err(e) => panic!("{}", e.to_string()),
     }
 }
 
@@ -89,7 +88,7 @@ fn test_rsa_pubkey_2048_invalid_format() {
 fn test_rsa_pubkey_2048_unknown_keytype() {
     match sshkeys::PublicKey::from_path("tests/test-keys/id_rsa_2048_unknown_keytype.pub") {
         Ok(v) => panic!("Expected unknown key type, got {:?}", v),
-        Err(e) => panic!("{}", e.description()),
+        Err(e) => panic!("{}", e.to_string()),
     }
 }
 
@@ -191,7 +190,7 @@ fn test_rsa_user_cert() {
 fn test_rsa_not_cert() {
     match sshkeys::Certificate::from_path("tests/test-keys/id_rsa_2048.pub") {
         Ok(v) => panic!("Expected public key, got certificate {:?}", v),
-        Err(e) => panic!("{}", e.description()),
+        Err(e) => panic!("{}", e.to_string()),
     }
 }
 
