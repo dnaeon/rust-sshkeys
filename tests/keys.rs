@@ -162,11 +162,14 @@ fn test_rsa_user_cert() {
     assert_eq!(cert.signature_key.comment, None);
 
     // CA public key fingerprints
-    let sha256fp = cert.signature_key
+    let sha256fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha256);
-    let sha384fp = cert.signature_key
+    let sha384fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha384);
-    let sha512fp = cert.signature_key
+    let sha512fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha512);
 
     assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
@@ -300,11 +303,14 @@ fn test_dsa_user_cert() {
     assert_eq!(cert.signature_key.comment, None);
 
     // CA public key fingerprints
-    let sha256fp = cert.signature_key
+    let sha256fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha256);
-    let sha384fp = cert.signature_key
+    let sha384fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha384);
-    let sha512fp = cert.signature_key
+    let sha512fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha512);
 
     assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
@@ -513,11 +519,14 @@ fn test_ecdsa_user_cert() {
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
 
-    let sha256fp = cert.signature_key
+    let sha256fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha256);
-    let sha384fp = cert.signature_key
+    let sha384fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha384);
-    let sha512fp = cert.signature_key
+    let sha512fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha512);
     assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
     assert_eq!(sha256fp.hash, "8bEmsdiV2BXhjrzPhp8dPrSLUK3U/YpIXT8NIw6Ym+s");
@@ -643,11 +652,14 @@ pub fn test_ed25519_user_cert() {
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
 
-    let sha256fp = cert.signature_key
+    let sha256fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha256);
-    let sha384fp = cert.signature_key
+    let sha384fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha384);
-    let sha512fp = cert.signature_key
+    let sha512fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha512);
     assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
     assert_eq!(sha256fp.hash, "8bEmsdiV2BXhjrzPhp8dPrSLUK3U/YpIXT8NIw6Ym+s");
@@ -732,11 +744,14 @@ fn test_ed25519_host_cert() {
     assert_eq!(cert.signature_key.bits(), 256);
     assert_eq!(cert.signature_key.comment, None);
 
-    let sha256fp = cert.signature_key
+    let sha256fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha256);
-    let sha384fp = cert.signature_key
+    let sha384fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha384);
-    let sha512fp = cert.signature_key
+    let sha512fp = cert
+        .signature_key
         .fingerprint_with(sshkeys::FingerprintKind::Sha512);
     assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
     assert_eq!(sha256fp.hash, "elYqUIgEUqMyc8AdNNk+IeI+2l1vWEh4K4n03hqhoD8");

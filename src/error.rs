@@ -1,5 +1,5 @@
-use std::{fmt, io, result, string};
 use std::error::Error as StdError;
+use std::{fmt, io, result, string};
 
 use base64;
 
@@ -64,13 +64,13 @@ impl StdError for Error {
             ErrorKind::Io(ref e) => e.source(),
             ErrorKind::Decode(ref e) => e.source(),
             ErrorKind::Utf8Error(ref e) => e.source(),
-            ErrorKind::InvalidCertType(_) |
-            ErrorKind::InvalidFormat |
-            ErrorKind::UnexpectedEof |
-            ErrorKind::NotCertificate |
-            ErrorKind::KeyTypeMismatch |
-            ErrorKind::UnknownCurve(_) |
-            ErrorKind::UnknownKeyType(_) => None,
+            ErrorKind::InvalidCertType(_)
+            | ErrorKind::InvalidFormat
+            | ErrorKind::UnexpectedEof
+            | ErrorKind::NotCertificate
+            | ErrorKind::KeyTypeMismatch
+            | ErrorKind::UnknownCurve(_)
+            | ErrorKind::UnknownKeyType(_) => None,
         }
     }
 }

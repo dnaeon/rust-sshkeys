@@ -1,13 +1,13 @@
 use std::collections::HashMap;
-use std::fs::File;
-use std::path::Path;
-use std::io::Read;
 use std::fmt;
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
 
+use super::error::{Error, ErrorKind, Result};
 use super::keytype::KeyType;
 use super::pubkey::PublicKey;
 use super::reader::Reader;
-use super::error::{Error, ErrorKind, Result};
 
 use base64;
 
@@ -116,7 +116,8 @@ impl Certificate {
     pub fn from_string(s: &str) -> Result<Certificate> {
         let mut iter = s.split_whitespace();
 
-        let kt_name = iter.next()
+        let kt_name = iter
+            .next()
             .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
         let kt = KeyType::from_name(&kt_name)?;
@@ -124,7 +125,8 @@ impl Certificate {
             return Err(Error::with_kind(ErrorKind::NotCertificate));
         }
 
-        let data = iter.next()
+        let data = iter
+            .next()
             .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
         let comment = iter.next().map(|v| String::from(v));
@@ -154,7 +156,9 @@ impl Certificate {
         let critical_options = reader.read_bytes().and_then(|v| read_options(&v))?;
         let extensions = reader.read_bytes().and_then(|v| read_options(&v))?;
         let reserved = reader.read_bytes()?;
-        let signature_key = reader.read_bytes().and_then(|v| PublicKey::from_bytes(&v))?;
+        let signature_key = reader
+            .read_bytes()
+            .and_then(|v| PublicKey::from_bytes(&v))?;
         let signature = reader.read_bytes()?;
 
         let cert = Certificate {
