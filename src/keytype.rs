@@ -1,5 +1,5 @@
 use super::error::{Error, ErrorKind, Result};
-
+use std::fmt;
 /// A type which represents the various kinds of keys.
 #[derive(Debug, PartialEq)]
 pub enum KeyTypeKind {
@@ -29,7 +29,7 @@ pub enum KeyTypeKind {
 }
 
 /// `KeyType` represents the type of an OpenSSH key.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct KeyType {
     /// Name of the key type.
     pub name: &'static str,
@@ -143,12 +143,18 @@ impl KeyType {
                 kind: KeyTypeKind::Ed25519Cert,
             },
             _ => {
-                return Err(Error::with_kind(
-                    ErrorKind::UnknownKeyType(name.to_string()),
-                ))
+                return Err(Error::with_kind(ErrorKind::UnknownKeyType(
+                    name.to_string(),
+                )))
             }
         };
 
         Ok(kt)
+    }
+}
+
+impl fmt::Display for KeyType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.name)
     }
 }

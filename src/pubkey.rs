@@ -1,12 +1,12 @@
-use std::io::{self, Read};
 use std::fmt;
 use std::fs::File;
+use std::io::{self, Read};
 use std::path::Path;
 
+use super::error::{Error, ErrorKind, Result};
 use super::keytype::{KeyType, KeyTypeKind};
 use super::reader::Reader;
 use super::writer::Writer;
-use super::error::{Error, ErrorKind, Result};
 
 use base64;
 
@@ -129,7 +129,7 @@ pub struct Ed25519PublicKey {
 }
 
 /// A type which represents an OpenSSH public key.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct PublicKey {
     /// Key type.
     pub key_type: KeyType,
@@ -150,11 +150,10 @@ impl fmt::Display for PublicKey {
 
         write!(
             f,
-            "{} {} {} ({})",
-            self.bits(),
-            self.fingerprint(),
-            comment,
-            self.key_type.short_name
+            "{} {} {}",
+            self.key_type,
+            base64::encode(&self.encode()),
+            comment
         )
     }
 }
@@ -268,10 +267,12 @@ impl PublicKey {
     pub fn from_string(contents: &str) -> Result<PublicKey> {
         let mut iter = contents.split_whitespace();
 
-        let kt_name = iter.next()
+        let kt_name = iter
+            .next()
             .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
-        let data = iter.next()
+        let data = iter
+            .next()
             .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
         let comment = iter.next().map(|v| String::from(v));
