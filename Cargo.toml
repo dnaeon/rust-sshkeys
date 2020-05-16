@@ -1,6 +1,6 @@
 [package]
 name = "sshkeys"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Marin Atanasov Nikolov <dnaeon@gmail.com>"]
 description = "Rust library for parsing OpenSSH certificates and public keys"
 documentation = "https://docs.rs/sshkeys"
