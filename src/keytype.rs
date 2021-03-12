@@ -142,6 +142,13 @@ impl KeyType {
                 is_cert: true,
                 kind: KeyTypeKind::Ed25519Cert,
             },
+            "sk-ecdsa-sha2-nistp256@openssh.com" => KeyType {
+                name: "sk-ecdsa-sha2-nistp256@openssh.com",
+                plain: "sk-ecdsa-sha2-nistp256@openssh.com",
+                short_name: "ECDSA-SK",
+                is_cert: false,
+                kind: KeyTypeKind::Ecdsa,
+            },
             _ => {
                 return Err(Error::with_kind(ErrorKind::UnknownKeyType(
                     name.to_string(),
