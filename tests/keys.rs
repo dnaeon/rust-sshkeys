@@ -768,3 +768,42 @@ fn test_ed25519_host_cert() {
 
     assert_eq!(cert.comment, Some("me@home".to_string()));
 }
+
+#[test]
+pub fn test_ecdsa_sk_sha2_nistp256_pubkey() {
+    let key = sshkeys::PublicKey::from_path("tests/test-keys/id_ecdsa_sk_sha2_nistp256.pub").unwrap();
+
+    assert_eq!(key.key_type.name, "sk-ecdsa-sha2-nistp256@openssh.com");
+    assert_eq!(key.key_type.plain, "sk-ecdsa-sha2-nistp256@openssh.com");
+    assert_eq!(key.key_type.short_name, "ECDSA-SK");
+    assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ecdsa);
+
+    assert_eq!(key.bits(), 256);
+    assert_eq!(key.comment, Some("yubikey-5c-test-wbrown".to_string()));
+
+    let sha256fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha256);
+    let sha384fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha384);
+    let sha512fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha512);
+
+    assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
+    assert_eq!(sha256fp.hash, "lj6Oqtu++aNnVpkp9wdU1ulee4Bku7GSUs0OFzsYDHw");
+    assert_eq!(sha384fp.kind, sshkeys::FingerprintKind::Sha384);
+    assert_eq!(
+        sha384fp.hash,
+        "wlsrLZw7GzZrulCfdZb6eEWUd1+Q7APCMIx1dGj3Hl5ZYNBvsIcVk7ZCyfRI4Gzi"
+    );
+    assert_eq!(sha512fp.kind, sshkeys::FingerprintKind::Sha512);
+    assert_eq!(
+        sha512fp.hash,
+        "r9m3XUpLwARqfK9vsZYQD4PWnJS7YnjCs1k4gURyuT/1B2E0tO7DE7/HmLGshlKdyJU3Fj/OqDKUiSadnBReRA"
+    );
+
+    let ecdsa = match key.kind {
+        sshkeys::PublicKeyKind::Ecdsa(ref k) => k,
+        _ => panic!("Expected ECDSA public key"),
+    };
+
+    assert_eq!(ecdsa.curve.identifier, "nistp256");
+    assert_eq!(ecdsa.curve.kind, sshkeys::CurveKind::Nistp256);
+}
