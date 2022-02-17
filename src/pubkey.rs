@@ -118,6 +118,9 @@ pub struct EcdsaPublicKey {
 
     /// The public key.
     pub key: Vec<u8>,
+
+    /// Associated security key application, if any.
+    pub sk_application: Option<String>,
 }
 
 /// ED25519 public key.
@@ -126,6 +129,9 @@ pub struct EcdsaPublicKey {
 pub struct Ed25519PublicKey {
     /// The public key.
     pub key: Vec<u8>,
+
+    /// Associated security key application, if any.
+    pub sk_application: Option<String>,
 }
 
 /// A type which represents an OpenSSH public key.
@@ -351,20 +357,31 @@ impl PublicKey {
 
                 PublicKeyKind::Dsa(k)
             }
-            KeyTypeKind::Ecdsa | KeyTypeKind::EcdsaCert => {
+            KeyTypeKind::Ecdsa | KeyTypeKind::EcdsaCert | KeyTypeKind::EcdsaSk => {
                 let identifier = reader.read_string()?;
                 let curve = Curve::from_identifier(&identifier)?;
                 let key = reader.read_bytes()?;
+                let sk_application = match kt.kind {
+                    KeyTypeKind::EcdsaSk => Some(reader.read_string()?),
+                    _ => None,
+                };
                 let k = EcdsaPublicKey {
                     curve: curve,
                     key: key,
+                    sk_application: sk_application,
                 };
 
                 PublicKeyKind::Ecdsa(k)
             }
-            KeyTypeKind::Ed25519 | KeyTypeKind::Ed25519Cert => {
+            KeyTypeKind::Ed25519 | KeyTypeKind::Ed25519Cert | KeyTypeKind::Ed25519Sk => {
+                let key = reader.read_bytes()?;
+                let sk_application = match kt.kind {
+                    KeyTypeKind::Ed25519Sk => Some(reader.read_string()?),
+                    _ => None,
+                };
                 let k = Ed25519PublicKey {
-                    key: reader.read_bytes()?,
+                    key: key,
+                    sk_application: sk_application,
                 };
 
                 PublicKeyKind::Ed25519(k)
@@ -433,9 +450,15 @@ impl PublicKey {
             PublicKeyKind::Ecdsa(ref k) => {
                 w.write_string(&k.curve.identifier);
                 w.write_bytes(&k.key);
+                if self.key_type.kind == KeyTypeKind::EcdsaSk {
+                    w.write_string(&k.sk_application.as_ref().unwrap());
+                }
             }
             PublicKeyKind::Ed25519(ref k) => {
                 w.write_bytes(&k.key);
+                if self.key_type.kind == KeyTypeKind::Ed25519Sk {
+                    w.write_string(&k.sk_application.as_ref().unwrap());
+                }
             }
         }
 

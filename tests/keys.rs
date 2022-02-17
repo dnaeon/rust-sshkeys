@@ -10,6 +10,7 @@ fn test_rsa_pubkey_1024() {
     assert_eq!(key.key_type.plain, "ssh-rsa");
     assert_eq!(key.key_type.short_name, "RSA");
     assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.is_sk, false);
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
 
     assert_eq!(key.bits(), 1024);
@@ -46,6 +47,7 @@ fn test_rsa_pubkey_2048() {
     assert_eq!(key.key_type.plain, "ssh-rsa");
     assert_eq!(key.key_type.short_name, "RSA");
     assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.is_sk, false);
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
 
     assert_eq!(key.bits(), 2048);
@@ -100,6 +102,7 @@ fn test_rsa_user_cert() {
     assert_eq!(cert.key_type.plain, "ssh-rsa");
     assert_eq!(cert.key_type.short_name, "RSA-CERT");
     assert_eq!(cert.key_type.is_cert, true);
+    assert_eq!(cert.key_type.is_sk, false);
     assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::RsaCert);
 
     // Public key part of the certificate
@@ -107,6 +110,7 @@ fn test_rsa_user_cert() {
     assert_eq!(cert.key.key_type.plain, "ssh-rsa");
     assert_eq!(cert.key.key_type.short_name, "RSA-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
+    assert_eq!(cert.key.key_type.is_sk, false);
     assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::RsaCert);
     assert_eq!(cert.key.bits(), 2048);
     assert_eq!(cert.key.comment, None);
@@ -157,6 +161,7 @@ fn test_rsa_user_cert() {
     assert_eq!(cert.signature_key.key_type.plain, "ssh-rsa");
     assert_eq!(cert.signature_key.key_type.short_name, "RSA");
     assert_eq!(cert.signature_key.key_type.is_cert, false);
+    assert_eq!(cert.signature_key.key_type.is_sk, false);
     assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
@@ -205,6 +210,7 @@ fn test_dsa_pubkey_1024() {
     assert_eq!(key.key_type.plain, "ssh-dss");
     assert_eq!(key.key_type.short_name, "DSA");
     assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.is_sk, false);
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Dsa);
 
     assert_eq!(key.bits(), 1024);
@@ -241,6 +247,7 @@ fn test_dsa_user_cert() {
     assert_eq!(cert.key_type.plain, "ssh-dss");
     assert_eq!(cert.key_type.short_name, "DSA-CERT");
     assert_eq!(cert.key_type.is_cert, true);
+    assert_eq!(cert.key_type.is_sk, false);
     assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::DsaCert);
 
     // Public key part of the certificate
@@ -248,6 +255,7 @@ fn test_dsa_user_cert() {
     assert_eq!(cert.key.key_type.plain, "ssh-dss");
     assert_eq!(cert.key.key_type.short_name, "DSA-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
+    assert_eq!(cert.key.key_type.is_sk, false);
     assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::DsaCert);
     assert_eq!(cert.key.bits(), 1024);
     assert_eq!(cert.key.comment, None);
@@ -298,6 +306,7 @@ fn test_dsa_user_cert() {
     assert_eq!(cert.signature_key.key_type.plain, "ssh-rsa");
     assert_eq!(cert.signature_key.key_type.short_name, "RSA");
     assert_eq!(cert.signature_key.key_type.is_cert, false);
+    assert_eq!(cert.signature_key.key_type.is_sk, false);
     assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
@@ -337,6 +346,7 @@ pub fn test_ecdsa_nistp256_pubkey() {
     assert_eq!(key.key_type.plain, "ecdsa-sha2-nistp256");
     assert_eq!(key.key_type.short_name, "ECDSA");
     assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.is_sk, false);
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ecdsa);
 
     assert_eq!(key.bits(), 256);
@@ -376,6 +386,7 @@ pub fn test_ecdsa_nistp384_pubkey() {
     assert_eq!(key.key_type.plain, "ecdsa-sha2-nistp384");
     assert_eq!(key.key_type.short_name, "ECDSA");
     assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.is_sk, false);
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ecdsa);
 
     assert_eq!(key.bits(), 384);
@@ -415,6 +426,7 @@ pub fn test_ecdsa_nistp521_pubkey() {
     assert_eq!(key.key_type.plain, "ecdsa-sha2-nistp521");
     assert_eq!(key.key_type.short_name, "ECDSA");
     assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.is_sk, false);
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ecdsa);
 
     assert_eq!(key.bits(), 521);
@@ -457,6 +469,7 @@ fn test_ecdsa_user_cert() {
     assert_eq!(cert.key_type.plain, "ecdsa-sha2-nistp521");
     assert_eq!(cert.key_type.short_name, "ECDSA-CERT");
     assert_eq!(cert.key_type.is_cert, true);
+    assert_eq!(cert.key_type.is_sk, false);
     assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::EcdsaCert);
 
     // Public key part of the certificate
@@ -467,6 +480,7 @@ fn test_ecdsa_user_cert() {
     assert_eq!(cert.key.key_type.plain, "ecdsa-sha2-nistp521");
     assert_eq!(cert.key.key_type.short_name, "ECDSA-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
+    assert_eq!(cert.key.key_type.is_sk, false);
     assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::EcdsaCert);
     assert_eq!(cert.key.bits(), 521);
     assert_eq!(cert.key.comment, None);
@@ -515,6 +529,7 @@ fn test_ecdsa_user_cert() {
     assert_eq!(cert.signature_key.key_type.plain, "ssh-rsa");
     assert_eq!(cert.signature_key.key_type.short_name, "RSA");
     assert_eq!(cert.signature_key.key_type.is_cert, false);
+    assert_eq!(cert.signature_key.key_type.is_sk, false);
     assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
@@ -552,6 +567,7 @@ pub fn test_ed25519_pubkey() {
     assert_eq!(key.key_type.plain, "ssh-ed25519");
     assert_eq!(key.key_type.short_name, "ED25519");
     assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.is_sk, false);
     assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ed25519);
 
     assert_eq!(key.bits(), 256);
@@ -592,6 +608,7 @@ pub fn test_ed25519_user_cert() {
     assert_eq!(cert.key_type.plain, "ssh-ed25519");
     assert_eq!(cert.key_type.short_name, "ED25519-CERT");
     assert_eq!(cert.key_type.is_cert, true);
+    assert_eq!(cert.key.key_type.is_sk, false);
     assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::Ed25519Cert);
 
     // Public key part of the certificate
@@ -599,6 +616,7 @@ pub fn test_ed25519_user_cert() {
     assert_eq!(cert.key.key_type.plain, "ssh-ed25519");
     assert_eq!(cert.key.key_type.short_name, "ED25519-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
+    assert_eq!(cert.key.key_type.is_sk, false);
     assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::Ed25519Cert);
     assert_eq!(cert.key.bits(), 256);
     assert_eq!(cert.key.comment, None);
@@ -648,6 +666,7 @@ pub fn test_ed25519_user_cert() {
     assert_eq!(cert.signature_key.key_type.plain, "ssh-rsa");
     assert_eq!(cert.signature_key.key_type.short_name, "RSA");
     assert_eq!(cert.signature_key.key_type.is_cert, false);
+    assert_eq!(cert.signature_key.key_type.is_sk, false);
     assert_eq!(cert.signature_key.key_type.kind, sshkeys::KeyTypeKind::Rsa);
     assert_eq!(cert.signature_key.bits(), 2048);
     assert_eq!(cert.signature_key.comment, None);
@@ -685,6 +704,7 @@ fn test_ed25519_host_cert() {
     assert_eq!(cert.key_type.plain, "ssh-ed25519");
     assert_eq!(cert.key_type.short_name, "ED25519-CERT");
     assert_eq!(cert.key_type.is_cert, true);
+    assert_eq!(cert.key_type.is_sk, false);
     assert_eq!(cert.key_type.kind, sshkeys::KeyTypeKind::Ed25519Cert);
 
     // Public key part of the certificate
@@ -692,6 +712,7 @@ fn test_ed25519_host_cert() {
     assert_eq!(cert.key.key_type.plain, "ssh-ed25519");
     assert_eq!(cert.key.key_type.short_name, "ED25519-CERT");
     assert_eq!(cert.key.key_type.is_cert, true);
+    assert_eq!(cert.key.key_type.is_sk, false);
     assert_eq!(cert.key.key_type.kind, sshkeys::KeyTypeKind::Ed25519Cert);
     assert_eq!(cert.key.bits(), 256);
     assert_eq!(cert.key.comment, None);
@@ -737,6 +758,7 @@ fn test_ed25519_host_cert() {
     assert_eq!(cert.signature_key.key_type.plain, "ssh-ed25519");
     assert_eq!(cert.signature_key.key_type.short_name, "ED25519");
     assert_eq!(cert.signature_key.key_type.is_cert, false);
+    assert_eq!(cert.signature_key.key_type.is_sk, false);
     assert_eq!(
         cert.signature_key.key_type.kind,
         sshkeys::KeyTypeKind::Ed25519
@@ -777,7 +799,8 @@ pub fn test_ecdsa_sk_sha2_nistp256_pubkey() {
     assert_eq!(key.key_type.plain, "sk-ecdsa-sha2-nistp256@openssh.com");
     assert_eq!(key.key_type.short_name, "ECDSA-SK");
     assert_eq!(key.key_type.is_cert, false);
-    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ecdsa);
+    assert_eq!(key.key_type.is_sk, true);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::EcdsaSk);
 
     assert_eq!(key.bits(), 256);
     assert_eq!(key.comment, Some("yubikey-5c-test-wbrown".to_string()));
@@ -787,16 +810,16 @@ pub fn test_ecdsa_sk_sha2_nistp256_pubkey() {
     let sha512fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha512);
 
     assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
-    assert_eq!(sha256fp.hash, "lj6Oqtu++aNnVpkp9wdU1ulee4Bku7GSUs0OFzsYDHw");
+    assert_eq!(sha256fp.hash, "lJ9TEvCO2FVQ443DnK7UQsA0sR44xXikW9p8gzH/q7s");
     assert_eq!(sha384fp.kind, sshkeys::FingerprintKind::Sha384);
     assert_eq!(
         sha384fp.hash,
-        "wlsrLZw7GzZrulCfdZb6eEWUd1+Q7APCMIx1dGj3Hl5ZYNBvsIcVk7ZCyfRI4Gzi"
+        "AqhOsPFQcdju8x42C9PMXP3wJiiR1EEkkxQIug8U6g/fdkAayCCaoHplws9j5Bci"
     );
     assert_eq!(sha512fp.kind, sshkeys::FingerprintKind::Sha512);
     assert_eq!(
         sha512fp.hash,
-        "r9m3XUpLwARqfK9vsZYQD4PWnJS7YnjCs1k4gURyuT/1B2E0tO7DE7/HmLGshlKdyJU3Fj/OqDKUiSadnBReRA"
+        "cQ8670XPoWANc1OjqLcd8kVSvpQGwFy6TufEvZTVJAcvoagSdOyWDwCUBdByVNA1wC5M1iRud32YjH5cNZDReQ"
     );
 
     let ecdsa = match key.kind {
@@ -806,4 +829,46 @@ pub fn test_ecdsa_sk_sha2_nistp256_pubkey() {
 
     assert_eq!(ecdsa.curve.identifier, "nistp256");
     assert_eq!(ecdsa.curve.kind, sshkeys::CurveKind::Nistp256);
+}
+
+
+#[test]
+pub fn test_ed25519_sk_pubkey() {
+    let key = sshkeys::PublicKey::from_path("tests/test-keys/id_ed25519_sk.pub").unwrap();
+
+    assert_eq!(key.key_type.name, "sk-ssh-ed25519@openssh.com");
+    assert_eq!(key.key_type.plain, "sk-ssh-ed25519@openssh.com");
+    assert_eq!(key.key_type.short_name, "ED25519-SK");
+    assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.is_sk, true);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ed25519Sk);
+
+    assert_eq!(key.bits(), 256);
+    assert_eq!(key.comment, Some("yubikey-test".to_string()));
+
+    let sha256fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha256);
+    let sha384fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha384);
+    let sha512fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha512);
+
+    assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
+    assert_eq!(sha256fp.hash, "SeRUPq2byTg+3B7rlHh+UBoiVET8yG9UJyeG3g3ul2c");
+    assert_eq!(sha384fp.kind, sshkeys::FingerprintKind::Sha384);
+    assert_eq!(
+        sha384fp.hash,
+        "DCgIRkLNG6UIVdyd3NGeKoP3CZh49BYCyyjvPOfb2ItOTOZDaI87lSuhXLWhcN6N"
+    );
+    assert_eq!(sha512fp.kind, sshkeys::FingerprintKind::Sha512);
+    assert_eq!(
+        sha512fp.hash,
+        "Se8yFxdmPxL7JtDgUPx71z+xZ8iP9G0cufzQ9rxILApVoN8dpAW8wkd4br+OEjuvzJzzolMUOkia+8Kt6NULeg"
+    );
+
+    let ed25519 = match key.kind {
+        sshkeys::PublicKeyKind::Ed25519(ref k) => k,
+        _ => panic!("Expected ED25519 public key"),
+    };
+
+    // Key size should be 32 bytes
+    // https://tools.ietf.org/html/draft-josefsson-eddsa-ed25519-03#section-5.5
+    assert_eq!(ed25519.key.len(), 32);
 }
