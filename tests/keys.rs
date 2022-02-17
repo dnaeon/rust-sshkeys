@@ -830,3 +830,45 @@ pub fn test_ecdsa_sk_sha2_nistp256_pubkey() {
     assert_eq!(ecdsa.curve.identifier, "nistp256");
     assert_eq!(ecdsa.curve.kind, sshkeys::CurveKind::Nistp256);
 }
+
+
+#[test]
+pub fn test_ed25519_sk_pubkey() {
+    let key = sshkeys::PublicKey::from_path("tests/test-keys/id_ed25519_sk.pub").unwrap();
+
+    assert_eq!(key.key_type.name, "sk-ssh-ed25519@openssh.com");
+    assert_eq!(key.key_type.plain, "sk-ssh-ed25519@openssh.com");
+    assert_eq!(key.key_type.short_name, "ED25519-SK");
+    assert_eq!(key.key_type.is_cert, false);
+    assert_eq!(key.key_type.is_sk, true);
+    assert_eq!(key.key_type.kind, sshkeys::KeyTypeKind::Ed25519Sk);
+
+    assert_eq!(key.bits(), 256);
+    assert_eq!(key.comment, Some("yubikey-test".to_string()));
+
+    let sha256fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha256);
+    let sha384fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha384);
+    let sha512fp = key.fingerprint_with(sshkeys::FingerprintKind::Sha512);
+
+    assert_eq!(sha256fp.kind, sshkeys::FingerprintKind::Sha256);
+    assert_eq!(sha256fp.hash, "SeRUPq2byTg+3B7rlHh+UBoiVET8yG9UJyeG3g3ul2c");
+    assert_eq!(sha384fp.kind, sshkeys::FingerprintKind::Sha384);
+    assert_eq!(
+        sha384fp.hash,
+        "DCgIRkLNG6UIVdyd3NGeKoP3CZh49BYCyyjvPOfb2ItOTOZDaI87lSuhXLWhcN6N"
+    );
+    assert_eq!(sha512fp.kind, sshkeys::FingerprintKind::Sha512);
+    assert_eq!(
+        sha512fp.hash,
+        "Se8yFxdmPxL7JtDgUPx71z+xZ8iP9G0cufzQ9rxILApVoN8dpAW8wkd4br+OEjuvzJzzolMUOkia+8Kt6NULeg"
+    );
+
+    let ed25519 = match key.kind {
+        sshkeys::PublicKeyKind::Ed25519(ref k) => k,
+        _ => panic!("Expected ED25519 public key"),
+    };
+
+    // Key size should be 32 bytes
+    // https://tools.ietf.org/html/draft-josefsson-eddsa-ed25519-03#section-5.5
+    assert_eq!(ed25519.key.len(), 32);
+}
