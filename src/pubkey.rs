@@ -118,6 +118,9 @@ pub struct EcdsaPublicKey {
 
     /// The public key.
     pub key: Vec<u8>,
+
+    /// Associated security key application, if any.
+    pub sk_application: Option<String>,
 }
 
 /// ED25519 public key.
@@ -351,13 +354,18 @@ impl PublicKey {
 
                 PublicKeyKind::Dsa(k)
             }
-            KeyTypeKind::Ecdsa | KeyTypeKind::EcdsaCert => {
+            KeyTypeKind::Ecdsa | KeyTypeKind::EcdsaCert | KeyTypeKind::EcdsaSk => {
                 let identifier = reader.read_string()?;
                 let curve = Curve::from_identifier(&identifier)?;
                 let key = reader.read_bytes()?;
+                let sk_application = match kt.kind {
+                    KeyTypeKind::EcdsaSk => Some(reader.read_string()?),
+                    _ => None,
+                };
                 let k = EcdsaPublicKey {
                     curve: curve,
                     key: key,
+                    sk_application: sk_application,
                 };
 
                 PublicKeyKind::Ecdsa(k)
@@ -433,6 +441,9 @@ impl PublicKey {
             PublicKeyKind::Ecdsa(ref k) => {
                 w.write_string(&k.curve.identifier);
                 w.write_bytes(&k.key);
+                if self.key_type.kind == KeyTypeKind::EcdsaSk {
+                    w.write_string(&k.sk_application.as_ref().unwrap());
+                }
             }
             PublicKeyKind::Ed25519(ref k) => {
                 w.write_bytes(&k.key);
