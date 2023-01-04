@@ -124,7 +124,7 @@ pub struct EcdsaPublicKey {
 }
 
 /// ED25519 public key.
-/// The format of ED25519 public keys is described in https://tools.ietf.org/html/draft-bjh21-ssh-ed25519-02
+/// The format of ED25519 public keys is described in <https://tools.ietf.org/html/draft-bjh21-ssh-ed25519-02>
 #[derive(Debug, PartialEq)]
 pub struct Ed25519PublicKey {
     /// The public key.
