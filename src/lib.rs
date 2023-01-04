@@ -25,6 +25,11 @@
 //!
 //! In order to view examples of this crate in use, please refer to the
 //! `examples` directory.
+//!
+//! # Features
+//!
+//! To enable serialisation of [PublicKey] you can enable the feature `serde`.
+//!
 
 extern crate base64;
 extern crate byteorder;
