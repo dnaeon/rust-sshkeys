@@ -10,6 +10,7 @@ use super::pubkey::PublicKey;
 use super::reader::Reader;
 
 use base64;
+use base64::Engine;
 
 /// Represents the different types a certificate can be.
 #[derive(Debug, PartialEq)]
@@ -130,7 +131,7 @@ impl Certificate {
             .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
         let comment = iter.next().map(|v| String::from(v));
-        let decoded = base64::decode(&data)?;
+        let decoded = base64::engine::general_purpose::STANDARD.decode(&data)?;
         let mut reader = Reader::new(&decoded);
 
         // Validate key types before reading the rest of the data

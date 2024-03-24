@@ -11,9 +11,9 @@ categories = ["cryptography", "parser-implementations", "encoding"]
 license-file = "LICENSE"
 
 [dependencies]
-base64 = "0.12.1"
+base64 = "0.22"
 byteorder = "1.3.4"
-sha2 = "0.8.1"
+sha2 = "0.10"
 serde = { version = "1", optional = true }
 
 [dev-dependencies]

@@ -793,7 +793,8 @@ fn test_ed25519_host_cert() {
 
 #[test]
 pub fn test_ecdsa_sk_sha2_nistp256_pubkey() {
-    let key = sshkeys::PublicKey::from_path("tests/test-keys/id_ecdsa_sk_sha2_nistp256.pub").unwrap();
+    let key =
+        sshkeys::PublicKey::from_path("tests/test-keys/id_ecdsa_sk_sha2_nistp256.pub").unwrap();
 
     assert_eq!(key.key_type.name, "sk-ecdsa-sha2-nistp256@openssh.com");
     assert_eq!(key.key_type.plain, "sk-ecdsa-sha2-nistp256@openssh.com");
@@ -830,7 +831,6 @@ pub fn test_ecdsa_sk_sha2_nistp256_pubkey() {
     assert_eq!(ecdsa.curve.identifier, "nistp256");
     assert_eq!(ecdsa.curve.kind, sshkeys::CurveKind::Nistp256);
 }
-
 
 #[test]
 pub fn test_ed25519_sk_pubkey() {

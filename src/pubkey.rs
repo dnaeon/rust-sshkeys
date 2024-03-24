@@ -9,6 +9,7 @@ use super::reader::Reader;
 use super::writer::Writer;
 
 use base64;
+use base64::Engine;
 
 use sha2::{Digest, Sha256, Sha384, Sha512};
 
@@ -158,7 +159,7 @@ impl fmt::Display for PublicKey {
             f,
             "{} {} {}",
             self.key_type,
-            base64::encode(&self.encode()),
+            base64::engine::general_purpose::STANDARD.encode(&self.encode()),
             comment
         )
     }
@@ -225,7 +226,7 @@ impl Fingerprint {
             FingerprintKind::Sha512 => Sha512::digest(&data.as_ref()).to_vec(),
         };
 
-        let mut encoded = base64::encode(&digest);
+        let mut encoded = base64::engine::general_purpose::STANDARD.encode(&digest);
 
         // Trim padding characters from end
         let hash = match encoded.find('=') {
@@ -285,7 +286,7 @@ impl PublicKey {
 
         let kt = KeyType::from_name(&kt_name)?;
 
-        let decoded = base64::decode(&data)?;
+        let decoded = base64::engine::general_purpose::STANDARD.decode(&data)?;
         let mut reader = Reader::new(&decoded);
 
         // Validate key type before reading rest of the data
@@ -516,7 +517,7 @@ impl PublicKey {
     /// ```
     pub fn write<W: io::Write>(&self, w: &mut W) -> io::Result<()> {
         let encoded = self.encode();
-        let data = base64::encode(&encoded);
+        let data = base64::engine::general_purpose::STANDARD.encode(&encoded);
         match self.comment {
             Some(ref c) => w.write_fmt(format_args!("{} {} {}\n", self.key_type.name, data, c)),
             None => w.write_fmt(format_args!("{} {}\n", self.key_type.name, data)),
