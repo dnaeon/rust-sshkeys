@@ -1,6 +1,6 @@
 ## sshkeys - Rust library for parsing OpenSSH public keys and certificates
 
-[![Build Status](https://travis-ci.org/dnaeon/rust-sshkeys.svg?branch=master)](https://travis-ci.org/dnaeon/rust-sshkeys)
+[![Build Status](https://github.com/dnaeon/rust-sshkeys/actions/workflows/test.yaml/badge.svg](https://github.com/dnaeon/rust-sshkeys/actions/workflows/test.yaml/badge.svg)
 [![Docs](https://docs.rs/sshkeys/badge.svg)](https://docs.rs/sshkeys/)
 
 The `sshkeys` crate is a Rust library, which provides types and methods for
