@@ -272,17 +272,44 @@ impl PublicKey {
     /// assert_eq!(fp.hash, "ciQkdxjFUhk2E2vRkWJD9kB8pi+EneOkaCJJHNWzPC4");
     /// ```
     pub fn from_string(contents: &str) -> Result<PublicKey> {
-        let mut iter = contents.split_whitespace();
-
-        let kt_name = iter
+        // Ssh public keys are on a single line, so we need to remove any new lines now.
+        let contents = contents
+            .lines()
             .next()
             .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
-        let data = iter
-            .next()
-            .ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
+        // Per man 8 sshd:
+        // """
+        // The optional comment field continues to the end of the line
+        // """
+        //
+        // This means we can't simply use str::split_whitespace since that can eat
+        // the comment field if the comment has spaces (which are valid).
+        // Additionally the function we *need* is currently nightly only.
+        //
+        // https://doc.rust-lang.org/std/str/struct.SplitWhitespace.html#method.remainder
+        //
+        // So this means we have to do this the hard way - we need to walk the string
+        // finding and splitting as we go. That's what the helper "split_whitespace" does
+        // for us.
+        let (kt_name, remainder) =
+            split_whitespace(contents).ok_or(Error::with_kind(ErrorKind::InvalidFormat))?;
 
-        let comment = iter.next().map(|v| String::from(v));
+        // If we have the ability to split, this means we have a comment.
+        // If the split fails, this means we only have data.
+        let (data, comment) = split_whitespace(remainder)
+            .map(|(data, comment)| {
+                // To keep this somewhat reasonable, we limit the comment to 256 chars.
+                let comment = comment
+                    .split_at_checked(256)
+                    .map(|(a, _)| a)
+                    .unwrap_or(comment);
+
+                let comment = String::from(comment);
+
+                (data, Some(comment))
+            })
+            .unwrap_or((remainder, None));
 
         let kt = KeyType::from_name(&kt_name)?;
 
@@ -523,4 +550,18 @@ impl PublicKey {
             None => w.write_fmt(format_args!("{} {}\n", self.key_type.name, data)),
         }
     }
+}
+
+// "We have SplitWhitespace at home".
+// https://doc.rust-lang.org/std/str/struct.SplitWhitespace.html#method.remainder
+fn split_whitespace(s: &str) -> Option<(&str, &str)> {
+    // Find the first whitespace index.
+    let whitespace_start = s.find(char::is_whitespace)?;
+    let (left, right) = s.split_at_checked(whitespace_start)?;
+
+    // Now find the start of right, skipping over a range of whitespace.
+    let non_whitespace_start = right.find(|c: char| !c.is_whitespace())?;
+    let (_, right) = right.split_at_checked(non_whitespace_start)?;
+
+    Some((left, right))
 }
