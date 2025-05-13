@@ -309,7 +309,11 @@ impl PublicKey {
 
                 (data, Some(comment))
             })
-            .unwrap_or((remainder, None));
+            .unwrap_or(
+                // We need to trim the end here as the key may have trailing whitespace
+                // but no comment.
+                (remainder.trim_end(), None),
+            );
 
         let kt = KeyType::from_name(&kt_name)?;
 
