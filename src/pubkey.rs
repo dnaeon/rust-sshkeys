@@ -299,12 +299,6 @@ impl PublicKey {
         // If the split fails, this means we only have data.
         let (data, comment) = split_whitespace(remainder)
             .map(|(data, comment)| {
-                // To keep this somewhat reasonable, we limit the comment to 256 chars.
-                let comment = comment
-                    .split_at_checked(256)
-                    .map(|(a, _)| a)
-                    .unwrap_or(comment);
-
                 let comment = String::from(comment);
 
                 (data, Some(comment))
