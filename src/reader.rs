@@ -21,7 +21,7 @@ impl<'a> Reader<'a> {
     /// let num = reader.read_u32().unwrap();
     /// assert_eq!(num, 42);
     /// ```
-    pub fn new<T: ?Sized + AsRef<[u8]>>(inner: &T) -> Reader {
+    pub fn new<T: ?Sized + AsRef<[u8]>>(inner: &T) -> Reader<'_> {
         Reader {
             inner: inner.as_ref(),
             offset: 0,
