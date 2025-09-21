@@ -11,7 +11,7 @@ In order to use this crate in your project, simply add the following to your
 
 ```toml
 [dependencies]
-sshkeys = "0.3.3"
+sshkeys = "0.3.4"
 ```
 
 ## Tests
